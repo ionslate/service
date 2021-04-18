@@ -9,17 +9,10 @@ import { nolookalikesSafe } from 'nanoid-dictionary';
 import { RuleService } from '@content/common/services/RuleService';
 import { DriverException, TableNotFoundException } from '@mikro-orm/core';
 import { AmmoService } from '@content/ammo/services/AmmoService';
-import { AmmoLoader } from '@content/ammo/loaders/AmmoLoader';
+import DataLoader from 'dataloader';
+import { AmmoEntity } from './content/ammo/entities/AmmoEntity';
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
-
-export type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends Record<string, unknown>
-    ? RecursivePartial<T[P]>
-    : T[P];
-};
 
 export type Page<T> = {
   content: T[];
@@ -82,7 +75,7 @@ export function formatError(e: GraphQLError): GraphQLFormattedError {
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
-  ammoLoader: AmmoLoader;
+  combinedAmmoLoader: DataLoader<string, AmmoEntity[], string>;
 };
 
 export const createContext = (
@@ -90,5 +83,5 @@ export const createContext = (
 ): ContextFunction<ExpressContext, AppContext> => () => ({
   ruleService: container.ruleService,
   ammoService: container.ammoService,
-  ammoLoader: container.ammoLoader,
+  combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
 });

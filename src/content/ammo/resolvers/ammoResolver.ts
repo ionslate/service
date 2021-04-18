@@ -15,7 +15,7 @@ export default {
       ammoService.updateAmmo(ammoId, request),
   },
   Ammo: {
-    combinedAmmo: (ammoEntity, _, { ammoLoader }) =>
-      ammoLoader.combinedAmmoLoader.load(ammoEntity.id),
+    combinedAmmo: (ammoEntity, _, { combinedAmmoLoader }) =>
+      combinedAmmoLoader.load(ammoEntity.id),
   },
 } as Resolvers;
