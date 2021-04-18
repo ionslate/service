@@ -85,4 +85,19 @@ export class AmmoService {
 
     return paginateEntites(ruleEntities, count, page, limit);
   }
+
+  async findCombinedAmmoByAmmoIds(ammoIds: string[]): Promise<AmmoEntity[][]> {
+    const combinedAmmoEntities = await this.ammoRepository.find(
+      {
+        parentAmmo: { id: { $in: ammoIds } },
+      },
+      ['parentAmmo'],
+    );
+
+    return ammoIds.map((ammoId) =>
+      combinedAmmoEntities.filter((childAmmo) => {
+        return childAmmo.parentAmmo.getIdentifiers('id').includes(ammoId);
+      }),
+    );
+  }
 }

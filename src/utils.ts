@@ -8,7 +8,8 @@ import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
 import { RuleService } from '@content/common/services/RuleService';
 import { DriverException, TableNotFoundException } from '@mikro-orm/core';
-import { AmmoService } from './content/ammo/services/AmmoService';
+import { AmmoService } from '@content/ammo/services/AmmoService';
+import { AmmoLoader } from '@content/ammo/loaders/AmmoLoader';
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -81,6 +82,7 @@ export function formatError(e: GraphQLError): GraphQLFormattedError {
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
+  ammoLoader: AmmoLoader;
 };
 
 export const createContext = (
@@ -88,4 +90,5 @@ export const createContext = (
 ): ContextFunction<ExpressContext, AppContext> => () => ({
   ruleService: container.ruleService,
   ammoService: container.ammoService,
+  ammoLoader: container.ammoLoader,
 });

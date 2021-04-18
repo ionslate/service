@@ -1,12 +1,13 @@
 import { BaseEntity, Collection, EntitySchema } from '@mikro-orm/core';
 import { generateId } from '@root/utils';
-import { RuleEntity } from '../../common/entities/RuleEntity';
+import { RuleEntity } from '@content/common/entities/RuleEntity';
 
 export class AmmoEntity extends BaseEntity<RuleEntity, 'id'> {
   id!: string;
   name!: string;
   link?: string | null;
   combinedAmmo = new Collection<AmmoEntity>(this);
+  parentAmmo = new Collection<AmmoEntity>(this);
 }
 
 export const ammoSchema = new EntitySchema({
@@ -20,6 +21,13 @@ export const ammoSchema = new EntitySchema({
     combinedAmmo: {
       reference: 'm:n',
       entity: () => AmmoEntity,
+      inversedBy: 'parentAmmo',
+      fixedOrder: true,
+    },
+    parentAmmo: {
+      reference: 'm:n',
+      entity: () => AmmoEntity,
+      mappedBy: 'combinedAmmo',
     },
   },
 });

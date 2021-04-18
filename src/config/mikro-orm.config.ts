@@ -7,4 +7,5 @@ export default {
   clientUrl: config.clientUrl,
   entities: ['./dist/**/entities/*'],
   entitiesTs: ['./src/**/entities/*'],
+  debug: true,
 } as Options<PostgreSqlDriver>;
