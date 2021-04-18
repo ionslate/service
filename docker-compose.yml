@@ -1,0 +1,10 @@
+version: '3'
+services:
+  database:
+    image: postgres:11
+    ports:
+      - 5555:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=antimateriel_db

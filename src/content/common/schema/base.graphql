@@ -1,0 +1,12 @@
+type ValidationError {
+  title: String!
+  description: String!
+}
+
+type Query {
+  _empty: Int
+}
+
+type Mutation {
+  _empty: Int
+}
