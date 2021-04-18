@@ -1,6 +1,7 @@
 import { AppContext } from './utils';
 import { GraphQLResolveInfo } from 'graphql';
 import { RuleEntity } from './content/common/entities/RuleEntity';
+import { AmmoEntity } from './content/ammo/entities/AmmoEntity';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -16,11 +17,32 @@ export type Scalars = {
   Float: number;
 };
 
+export type Ammo = {
+  __typename?: 'Ammo';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  link?: Maybe<Scalars['String']>;
+  combinedAmmo: Array<Ammo>;
+};
+
+export type AmmoRequest = {
+  name: Scalars['String'];
+  link?: Maybe<Scalars['String']>;
+  combinedAmmoIds: Array<Scalars['ID']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   _empty?: Maybe<Scalars['Int']>;
+  createAmmo: Ammo;
   createRule: Rule;
+  updateAmmo: Ammo;
   updateRule: Rule;
+};
+
+
+export type MutationCreateAmmoArgs = {
+  request: AmmoRequest;
 };
 
 
@@ -29,9 +51,24 @@ export type MutationCreateRuleArgs = {
 };
 
 
+export type MutationUpdateAmmoArgs = {
+  ammoId: Scalars['ID'];
+  request: AmmoRequest;
+};
+
+
 export type MutationUpdateRuleArgs = {
   ruleId: Scalars['ID'];
   request: RuleRequest;
+};
+
+export type PagedAmmo = {
+  __typename?: 'PagedAmmo';
+  content: Array<Ammo>;
+  limit?: Maybe<Scalars['Int']>;
+  count: Scalars['Int'];
+  page: Scalars['Int'];
+  last: Scalars['Boolean'];
 };
 
 export type PagedRules = {
@@ -46,9 +83,18 @@ export type PagedRules = {
 export type Query = {
   __typename?: 'Query';
   _empty?: Maybe<Scalars['Int']>;
+  allAmmo: PagedAmmo;
   allRules: PagedRules;
+  ammoById?: Maybe<Ammo>;
   ruleById?: Maybe<Rule>;
+  searchAmmo: PagedAmmo;
   searchRules: PagedRules;
+};
+
+
+export type QueryAllAmmoArgs = {
+  page?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -58,8 +104,20 @@ export type QueryAllRulesArgs = {
 };
 
 
+export type QueryAmmoByIdArgs = {
+  id: Scalars['ID'];
+};
+
+
 export type QueryRuleByIdArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QuerySearchAmmoArgs = {
+  name: Scalars['String'];
+  page?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -179,13 +237,16 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  Ammo: ResolverTypeWrapper<AmmoEntity>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
+  String: ResolverTypeWrapper<Scalars['String']>;
+  AmmoRequest: AmmoRequest;
   Mutation: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
-  PagedRules: ResolverTypeWrapper<Omit<PagedRules, 'content'> & { content: Array<ResolversTypes['Rule']> }>;
+  PagedAmmo: ResolverTypeWrapper<Omit<PagedAmmo, 'content'> & { content: Array<ResolversTypes['Ammo']> }>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  PagedRules: ResolverTypeWrapper<Omit<PagedRules, 'content'> & { content: Array<ResolversTypes['Rule']> }>;
   Query: ResolverTypeWrapper<{}>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   Rule: ResolverTypeWrapper<RuleEntity>;
   RuleRequest: RuleRequest;
   RuleType: RuleType;
@@ -194,22 +255,44 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  Ammo: AmmoEntity;
+  ID: Scalars['ID'];
+  String: Scalars['String'];
+  AmmoRequest: AmmoRequest;
   Mutation: {};
   Int: Scalars['Int'];
-  ID: Scalars['ID'];
-  PagedRules: Omit<PagedRules, 'content'> & { content: Array<ResolversParentTypes['Rule']> };
+  PagedAmmo: Omit<PagedAmmo, 'content'> & { content: Array<ResolversParentTypes['Ammo']> };
   Boolean: Scalars['Boolean'];
+  PagedRules: Omit<PagedRules, 'content'> & { content: Array<ResolversParentTypes['Rule']> };
   Query: {};
-  String: Scalars['String'];
   Rule: RuleEntity;
   RuleRequest: RuleRequest;
   ValidationError: ValidationError;
 }>;
 
+export type AmmoResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Ammo'] = ResolversParentTypes['Ammo']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  link?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  combinedAmmo?: Resolver<Array<ResolversTypes['Ammo']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   _empty?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  createAmmo?: Resolver<ResolversTypes['Ammo'], ParentType, ContextType, RequireFields<MutationCreateAmmoArgs, 'request'>>;
   createRule?: Resolver<ResolversTypes['Rule'], ParentType, ContextType, RequireFields<MutationCreateRuleArgs, 'request'>>;
+  updateAmmo?: Resolver<ResolversTypes['Ammo'], ParentType, ContextType, RequireFields<MutationUpdateAmmoArgs, 'ammoId' | 'request'>>;
   updateRule?: Resolver<ResolversTypes['Rule'], ParentType, ContextType, RequireFields<MutationUpdateRuleArgs, 'ruleId' | 'request'>>;
+}>;
+
+export type PagedAmmoResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['PagedAmmo'] = ResolversParentTypes['PagedAmmo']> = ResolversObject<{
+  content?: Resolver<Array<ResolversTypes['Ammo']>, ParentType, ContextType>;
+  limit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  page?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  last?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PagedRulesResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['PagedRules'] = ResolversParentTypes['PagedRules']> = ResolversObject<{
@@ -223,8 +306,11 @@ export type PagedRulesResolvers<ContextType = AppContext, ParentType extends Res
 
 export type QueryResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   _empty?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  allAmmo?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QueryAllAmmoArgs, never>>;
   allRules?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QueryAllRulesArgs, never>>;
+  ammoById?: Resolver<Maybe<ResolversTypes['Ammo']>, ParentType, ContextType, RequireFields<QueryAmmoByIdArgs, 'id'>>;
   ruleById?: Resolver<Maybe<ResolversTypes['Rule']>, ParentType, ContextType, RequireFields<QueryRuleByIdArgs, 'id'>>;
+  searchAmmo?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QuerySearchAmmoArgs, 'name'>>;
   searchRules?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QuerySearchRulesArgs, 'name'>>;
 }>;
 
@@ -243,7 +329,9 @@ export type ValidationErrorResolvers<ContextType = AppContext, ParentType extend
 }>;
 
 export type Resolvers<ContextType = AppContext> = ResolversObject<{
+  Ammo?: AmmoResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PagedAmmo?: PagedAmmoResolvers<ContextType>;
   PagedRules?: PagedRulesResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Rule?: RuleResolvers<ContextType>;

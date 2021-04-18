@@ -1,8 +1,7 @@
-import { EntitySchema } from '@mikro-orm/core';
+import { BaseEntity, EntitySchema } from '@mikro-orm/core';
 import { generateId } from '@root/utils';
-import { Rule } from '@root/__generatedTypes__';
 
-export class RuleEntity implements Rule {
+export class RuleEntity extends BaseEntity<RuleEntity, 'id'> {
   id!: string;
   name!: string;
   link?: string | null;
@@ -10,6 +9,7 @@ export class RuleEntity implements Rule {
 
 export const ruleSchema = new EntitySchema({
   class: RuleEntity,
+  extends: 'BaseEntity',
   tableName: 'rule',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },

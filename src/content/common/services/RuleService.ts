@@ -1,27 +1,30 @@
 import { RuleEntity } from '@content/common/entities/RuleEntity';
-import { EntityRepository, QueryOrder } from '@mikro-orm/core';
+import { QueryOrder } from '@mikro-orm/core';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import { RuleRequest } from '@root/__generatedTypes__';
 
 export class RuleService {
   constructor(private ruleRepository: EntityRepository<RuleEntity>) {}
 
-  async addRule(request: RuleRequest): Promise<RuleEntity> {
-    const ammoEntity = this.ruleRepository.create({
+  async createRule(request: RuleRequest): Promise<RuleEntity> {
+    const ruleEntity = this.ruleRepository.create({
       name: request.name,
       link: request.link,
     });
 
-    await this.ruleRepository.persistAndFlush(ammoEntity);
+    await this.ruleRepository.persistAndFlush(ruleEntity);
 
-    return ammoEntity;
+    return ruleEntity;
   }
 
   async updateRule(ruleId: string, request: RuleRequest): Promise<RuleEntity> {
     const ruleEntity = await this.ruleRepository.findOneOrFail({ id: ruleId });
 
-    ruleEntity.name = request.name;
-    ruleEntity.link = request.link;
+    ruleEntity.assign({
+      name: request.name,
+      link: request.link,
+    });
 
     this.ruleRepository.persistAndFlush(ruleEntity);
 
