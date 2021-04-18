@@ -13,7 +13,7 @@ export default {
   },
   Mutation: {
     createRule: (_, { request }, { ruleService }) =>
-      ruleService.addRule(request),
+      ruleService.createRule(request),
     updateRule: (_, { ruleId, request }, { ruleService }) =>
       ruleService.updateRule(ruleId, request),
   },

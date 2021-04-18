@@ -1,0 +1,31 @@
+type Ammo {
+  id: ID!
+  name: String!
+  link: String
+  combinedAmmo: [Ammo!]!
+}
+
+type PagedAmmo {
+  content: [Ammo!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+input AmmoRequest {
+  name: String!
+  link: String
+  combinedAmmoIds: [ID!]!
+}
+
+extend type Query {
+  ammoById(id: ID!): Ammo
+  searchAmmo(name: String!, page: Int, limit: Int): PagedAmmo!
+  allAmmo(page: Int, limit: Int): PagedAmmo!
+}
+
+extend type Mutation {
+  createAmmo(request: AmmoRequest!): Ammo!
+  updateAmmo(ammoId: ID!, request: AmmoRequest!): Ammo!
+}

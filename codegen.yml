@@ -8,6 +8,7 @@ generates:
       contextType: AppContext
       mappers:
         Rule: ./content/common/entities/RuleEntity#RuleEntity
+        Ammo: ./content/ammo/entities/AmmoEntity#AmmoEntity
     plugins:
       - add:
           content: "import { AppContext } from './utils';"

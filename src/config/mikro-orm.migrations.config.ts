@@ -10,5 +10,4 @@ export default {
   migrations: {
     path: './src/__migrations__',
   },
-  debug: true,
 } as Options<PostgreSqlDriver>;
