@@ -1,0 +1,18 @@
+schema: ./src/**/**.graphql
+generates:
+  ./src/__generatedTypes__.ts:
+    config:
+      useIndexSignature: true
+      enumsAsTypes: true
+      maybeValue: T | null
+      contextType: AppContext
+      mappers:
+        Rule: ./content/common/entities/RuleEntity#RuleEntity
+    plugins:
+      - add:
+          content: "import { AppContext } from './utils';"
+      # - add:
+      #     content: 'export type ValidationRuleType = CountsAsRuleType | RequiresUnitInCombatGroupType;'
+      #     placement: 'append'
+      - typescript
+      - typescript-resolvers

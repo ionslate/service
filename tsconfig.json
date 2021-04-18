@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2018",                             
+    "module": "CommonJS",
+    "outDir": "./dist",                              
+    "rootDir": "./src",                              
+    "noImplicitAny": true,                           
+    "strictNullChecks": true,                        
+    "strictFunctionTypes": true,                     
+    "strictBindCallApply": true,                    
+    "strictPropertyInitialization": true,            
+    "noImplicitThis": true,                          
+    "alwaysStrict": true,                           
+    "noUncheckedIndexedAccess": true,                
+    "moduleResolution": "node",                      
+    "baseUrl": "./src",                            
+    "paths": {                                      
+      "@root/*": ["*"], 
+      "@content/*": ["content/*"],
+      "@config/*": ["config/*"]
+      },               
+    "allowSyntheticDefaultImports": true,            
+    "esModuleInterop": true,                       
+    "skipLibCheck": true,                           
+    "forceConsistentCasingInFileNames": true
+  }
+}
