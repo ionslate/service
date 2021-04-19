@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { AmmoRequest } from '@root/__generatedTypes__';
-import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
+import { AmmoRequest, Search } from '@root/__generatedTypes__';
+import { AmmoEntity } from '@root/content-manager/weapons/entities/AmmoEntity';
 import { Page, paginateEntites } from '@root/utils';
 import { QueryOrder } from '@mikro-orm/core';
 
@@ -58,13 +58,13 @@ export class AmmoService {
     return await this.ammoRepository.findOne({ id: ammoId });
   }
 
-  async findAmmoByName(
-    name: string,
+  async getAmmoList(
+    search?: Search,
     page?: number,
     limit?: number,
   ): Promise<Page<AmmoEntity>> {
     const [ruleEntities, count] = await this.ammoRepository.findAndCount(
-      { name: { $ilike: `%${name}%` } },
+      search ? { name: { $ilike: `%${search.name}%` } } : {},
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
@@ -75,20 +75,7 @@ export class AmmoService {
     return paginateEntites(ruleEntities, count, page, limit);
   }
 
-  async findAllAmmo(page?: number, limit?: number): Promise<Page<AmmoEntity>> {
-    const [ruleEntities, count] = await this.ammoRepository.findAndCount(
-      {},
-      {
-        orderBy: { name: QueryOrder.ASC },
-        limit,
-        offset: page,
-      },
-    );
-
-    return paginateEntites(ruleEntities, count, page, limit);
-  }
-
-  async findCombinedAmmoByAmmoIds(ammoIds: string[]): Promise<AmmoEntity[][]> {
+  async getCombinedAmmoByAmmoIds(ammoIds: string[]): Promise<AmmoEntity[][]> {
     const combinedAmmoEntities = await this.ammoRepository.find(
       {
         parentAmmo: { id: { $in: ammoIds } },

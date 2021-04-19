@@ -4,18 +4,13 @@ export default {
   Query: {
     hackingProgramById: (_, { hackingProgramId }, { hackingProgramService }) =>
       hackingProgramService.findHackingProgramById(hackingProgramId),
-    allHackingPrograms: (_, { page, limit }, { hackingProgramService }) =>
-      hackingProgramService.findAllHackingPrograms(
-        page || undefined,
-        limit || undefined,
-      ),
-    searchHackingPrograms: (
+    hackingProgramsList: (
       _,
-      { name, page, limit },
+      { search, page, limit },
       { hackingProgramService },
     ) =>
-      hackingProgramService.findHackingProgramByName(
-        name,
+      hackingProgramService.getHackingProgramsList(
+        search || undefined,
         page || undefined,
         limit || undefined,
       ),

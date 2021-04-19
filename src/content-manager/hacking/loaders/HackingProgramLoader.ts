@@ -11,7 +11,7 @@ export class HackingProgramLoader {
     string
   > =>
     new Dataloader((ids: Readonly<string[]>) =>
-      this.hackingProgramService.findHackingProgramsByHackingDeviceIds(
+      this.hackingProgramService.getHackingProgramsByHackingDeviceIds(
         ids as string[],
       ),
     );

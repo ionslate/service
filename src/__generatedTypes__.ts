@@ -1,7 +1,7 @@
 import { AppContext } from '@root/container';
 import { GraphQLResolveInfo } from 'graphql';
 import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
-import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
+import { AmmoEntity } from '@content-manager/weapons/entities/AmmoEntity';
 import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
 import { HackingDeviceEntity } from '@content-manager/hacking/entities/HackingDeviceEntity';
 export type Maybe<T> = T | null;
@@ -88,22 +88,14 @@ export type HackingProgramTarget =
 export type Mutation = {
   __typename?: 'Mutation';
   _empty?: Maybe<Scalars['Int']>;
-  addProgramToHackingDevice: HackingDevice;
   createAmmo: Ammo;
   createHackingDevice: HackingDevice;
   createHackingProgram: HackingProgram;
   createRule: Rule;
-  removeProgramFromHackingDevice?: Maybe<Scalars['ID']>;
   updateAmmo: Ammo;
   updateHackingDevice: HackingDevice;
   updateHackingProgram: HackingProgram;
   updateRule: Rule;
-};
-
-
-export type MutationAddProgramToHackingDeviceArgs = {
-  hackingDeviceId: Scalars['ID'];
-  hackingProgramId: Scalars['ID'];
 };
 
 
@@ -124,12 +116,6 @@ export type MutationCreateHackingProgramArgs = {
 
 export type MutationCreateRuleArgs = {
   request: RuleRequest;
-};
-
-
-export type MutationRemoveProgramFromHackingDeviceArgs = {
-  hackingDeviceId: Scalars['ID'];
-  hackingProgramId: Scalars['ID'];
 };
 
 
@@ -195,42 +181,14 @@ export type PagedRules = {
 export type Query = {
   __typename?: 'Query';
   _empty?: Maybe<Scalars['Int']>;
-  allAmmo: PagedAmmo;
-  allHackingDevices: PagedHackingDevices;
-  allHackingPrograms: PagedHackingPrograms;
-  allRules: PagedRules;
   ammoById?: Maybe<Ammo>;
+  ammoList: PagedAmmo;
   hackingDeviceById?: Maybe<HackingDevice>;
+  hackingDevicesList: PagedHackingDevices;
   hackingProgramById?: Maybe<HackingProgram>;
+  hackingProgramsList: PagedHackingPrograms;
   ruleById?: Maybe<Rule>;
-  searchAmmo: PagedAmmo;
-  searchHackingDevices: PagedHackingDevices;
-  searchHackingPrograms: PagedHackingPrograms;
-  searchRules: PagedRules;
-};
-
-
-export type QueryAllAmmoArgs = {
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryAllHackingDevicesArgs = {
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryAllHackingProgramsArgs = {
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryAllRulesArgs = {
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
+  rulesList: PagedRules;
 };
 
 
@@ -239,8 +197,22 @@ export type QueryAmmoByIdArgs = {
 };
 
 
+export type QueryAmmoListArgs = {
+  search?: Maybe<Search>;
+  page?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+};
+
+
 export type QueryHackingDeviceByIdArgs = {
   hackingDeviceId: Scalars['ID'];
+};
+
+
+export type QueryHackingDevicesListArgs = {
+  search?: Maybe<Search>;
+  page?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -249,34 +221,20 @@ export type QueryHackingProgramByIdArgs = {
 };
 
 
+export type QueryHackingProgramsListArgs = {
+  search?: Maybe<Search>;
+  page?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+};
+
+
 export type QueryRuleByIdArgs = {
   ruleId: Scalars['ID'];
 };
 
 
-export type QuerySearchAmmoArgs = {
-  name: Scalars['String'];
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QuerySearchHackingDevicesArgs = {
-  name: Scalars['String'];
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QuerySearchHackingProgramsArgs = {
-  name: Scalars['String'];
-  page?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QuerySearchRulesArgs = {
-  name: Scalars['String'];
+export type QueryRulesListArgs = {
+  search?: Maybe<Search>;
   page?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -305,6 +263,10 @@ export type RuleType =
   | 'FIRETEAM_CORE'
   | 'FIRETEAM_DUO'
   | 'HIDDEN_DEPLOYMENT';
+
+export type Search = {
+  name: Scalars['String'];
+};
 
 export type ValidationError = {
   __typename?: 'ValidationError';
@@ -412,6 +374,7 @@ export type ResolversTypes = ResolversObject<{
   Rule: ResolverTypeWrapper<RuleEntity>;
   RuleRequest: RuleRequest;
   RuleType: RuleType;
+  Search: Search;
   ValidationError: ResolverTypeWrapper<ValidationError>;
 }>;
 
@@ -435,6 +398,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   Rule: RuleEntity;
   RuleRequest: RuleRequest;
+  Search: Search;
   ValidationError: ValidationError;
 }>;
 
@@ -471,12 +435,10 @@ export type HackingProgramResolvers<ContextType = AppContext, ParentType extends
 
 export type MutationResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   _empty?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  addProgramToHackingDevice?: Resolver<ResolversTypes['HackingDevice'], ParentType, ContextType, RequireFields<MutationAddProgramToHackingDeviceArgs, 'hackingDeviceId' | 'hackingProgramId'>>;
   createAmmo?: Resolver<ResolversTypes['Ammo'], ParentType, ContextType, RequireFields<MutationCreateAmmoArgs, 'request'>>;
   createHackingDevice?: Resolver<ResolversTypes['HackingDevice'], ParentType, ContextType, RequireFields<MutationCreateHackingDeviceArgs, 'request'>>;
   createHackingProgram?: Resolver<ResolversTypes['HackingProgram'], ParentType, ContextType, RequireFields<MutationCreateHackingProgramArgs, 'request'>>;
   createRule?: Resolver<ResolversTypes['Rule'], ParentType, ContextType, RequireFields<MutationCreateRuleArgs, 'request'>>;
-  removeProgramFromHackingDevice?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType, RequireFields<MutationRemoveProgramFromHackingDeviceArgs, 'hackingDeviceId' | 'hackingProgramId'>>;
   updateAmmo?: Resolver<ResolversTypes['Ammo'], ParentType, ContextType, RequireFields<MutationUpdateAmmoArgs, 'ammoId' | 'request'>>;
   updateHackingDevice?: Resolver<ResolversTypes['HackingDevice'], ParentType, ContextType, RequireFields<MutationUpdateHackingDeviceArgs, 'hackingDeviceId' | 'request'>>;
   updateHackingProgram?: Resolver<ResolversTypes['HackingProgram'], ParentType, ContextType, RequireFields<MutationUpdateHackingProgramArgs, 'hackingProgramId' | 'request'>>;
@@ -521,18 +483,14 @@ export type PagedRulesResolvers<ContextType = AppContext, ParentType extends Res
 
 export type QueryResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   _empty?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  allAmmo?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QueryAllAmmoArgs, never>>;
-  allHackingDevices?: Resolver<ResolversTypes['PagedHackingDevices'], ParentType, ContextType, RequireFields<QueryAllHackingDevicesArgs, never>>;
-  allHackingPrograms?: Resolver<ResolversTypes['PagedHackingPrograms'], ParentType, ContextType, RequireFields<QueryAllHackingProgramsArgs, never>>;
-  allRules?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QueryAllRulesArgs, never>>;
   ammoById?: Resolver<Maybe<ResolversTypes['Ammo']>, ParentType, ContextType, RequireFields<QueryAmmoByIdArgs, 'ammoId'>>;
+  ammoList?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QueryAmmoListArgs, never>>;
   hackingDeviceById?: Resolver<Maybe<ResolversTypes['HackingDevice']>, ParentType, ContextType, RequireFields<QueryHackingDeviceByIdArgs, 'hackingDeviceId'>>;
+  hackingDevicesList?: Resolver<ResolversTypes['PagedHackingDevices'], ParentType, ContextType, RequireFields<QueryHackingDevicesListArgs, never>>;
   hackingProgramById?: Resolver<Maybe<ResolversTypes['HackingProgram']>, ParentType, ContextType, RequireFields<QueryHackingProgramByIdArgs, 'hackingProgramId'>>;
+  hackingProgramsList?: Resolver<ResolversTypes['PagedHackingPrograms'], ParentType, ContextType, RequireFields<QueryHackingProgramsListArgs, never>>;
   ruleById?: Resolver<Maybe<ResolversTypes['Rule']>, ParentType, ContextType, RequireFields<QueryRuleByIdArgs, 'ruleId'>>;
-  searchAmmo?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QuerySearchAmmoArgs, 'name'>>;
-  searchHackingDevices?: Resolver<ResolversTypes['PagedHackingDevices'], ParentType, ContextType, RequireFields<QuerySearchHackingDevicesArgs, 'name'>>;
-  searchHackingPrograms?: Resolver<ResolversTypes['PagedHackingPrograms'], ParentType, ContextType, RequireFields<QuerySearchHackingProgramsArgs, 'name'>>;
-  searchRules?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QuerySearchRulesArgs, 'name'>>;
+  rulesList?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QueryRulesListArgs, never>>;
 }>;
 
 export type RuleResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Rule'] = ResolversParentTypes['Rule']> = ResolversObject<{

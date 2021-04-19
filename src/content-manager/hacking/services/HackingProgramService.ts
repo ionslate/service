@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
-import { HackingProgramRequest } from '@root/__generatedTypes__';
+import { HackingProgramRequest, Search } from '@root/__generatedTypes__';
 import { Page, paginateEntites } from '@root/utils';
 import { QueryOrder } from '@mikro-orm/core';
 
@@ -62,8 +62,8 @@ export class HackingProgramService {
     });
   }
 
-  async findHackingProgramByName(
-    name: string,
+  async getHackingProgramsList(
+    search?: Search,
     page?: number,
     limit?: number,
   ): Promise<Page<HackingProgramEntity>> {
@@ -71,7 +71,7 @@ export class HackingProgramService {
       hackingProgramEntities,
       count,
     ] = await this.hackingProgramRepository.findAndCount(
-      { name: { $ilike: `%${name}%` } },
+      search ? { name: { $ilike: `%${search.name}%` } } : {},
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
@@ -82,26 +82,7 @@ export class HackingProgramService {
     return paginateEntites(hackingProgramEntities, count, page, limit);
   }
 
-  async findAllHackingPrograms(
-    page?: number,
-    limit?: number,
-  ): Promise<Page<HackingProgramEntity>> {
-    const [
-      hackingProgramEntities,
-      count,
-    ] = await this.hackingProgramRepository.findAndCount(
-      {},
-      {
-        orderBy: { name: QueryOrder.ASC },
-        limit,
-        offset: page,
-      },
-    );
-
-    return paginateEntites(hackingProgramEntities, count, page, limit);
-  }
-
-  async findHackingProgramsByHackingDeviceIds(
+  async getHackingProgramsByHackingDeviceIds(
     hackingDeviceIds: string[],
   ): Promise<HackingProgramEntity[][]> {
     const hackingProgramEntities = await this.hackingProgramRepository.find(

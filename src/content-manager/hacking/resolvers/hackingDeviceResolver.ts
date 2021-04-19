@@ -4,18 +4,13 @@ export default {
   Query: {
     hackingDeviceById: (_, { hackingDeviceId }, { hackingDeviceService }) =>
       hackingDeviceService.findHackingDevicById(hackingDeviceId),
-    allHackingDevices: (_, { page, limit }, { hackingDeviceService }) =>
-      hackingDeviceService.findAllHackingDevices(
-        page || undefined,
-        limit || undefined,
-      ),
-    searchHackingDevices: (
+    hackingDevicesList: (
       _,
-      { name, page, limit },
+      { search, page, limit },
       { hackingDeviceService },
     ) =>
-      hackingDeviceService.findHackingDeviceByName(
-        name,
+      hackingDeviceService.getHackingDevicesList(
+        search || undefined,
         page || undefined,
         limit || undefined,
       ),

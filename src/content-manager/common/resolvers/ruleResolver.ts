@@ -4,13 +4,12 @@ export default {
   Query: {
     ruleById: (_, { ruleId }, { ruleService }) =>
       ruleService.findRuleById(ruleId),
-    searchRules: (_, { name, page, limit }, { ruleService }) =>
-      ruleService.findRulesByName(name, page || undefined, limit || undefined),
-    allRules: (
-      _,
-      { page, limit }: { page: number; limit: number },
-      { ruleService },
-    ) => ruleService.findAllRules(page, limit),
+    rulesList: (_, { search, page, limit }, { ruleService }) =>
+      ruleService.getRulesList(
+        search || undefined,
+        page || undefined,
+        limit || undefined,
+      ),
   },
   Mutation: {
     createRule: (_, { request }, { ruleService }) =>

@@ -33,8 +33,7 @@ input RuleRequest {
 
 extend type Query {
   ruleById(ruleId: ID!): Rule
-  searchRules(name: String!, page: Int, limit: Int): PagedRules!
-  allRules(page: Int, limit: Int): PagedRules!
+  rulesList(search: Search, page: Int, limit: Int): PagedRules!
 }
 
 extend type Mutation {
