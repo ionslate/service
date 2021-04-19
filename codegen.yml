@@ -7,8 +7,8 @@ generates:
       maybeValue: T | null
       contextType: AppContext
       mappers:
-        Rule: ./content/common/entities/RuleEntity#RuleEntity
-        Ammo: ./content/ammo/entities/AmmoEntity#AmmoEntity
+        Rule: '@content-manager/common/entities/RuleEntity#RuleEntity'
+        Ammo: '@content-manager/ammo/entities/AmmoEntity#AmmoEntity'
     plugins:
       - add:
           content: "import { AppContext } from './utils';"

@@ -6,6 +6,10 @@ import dbConfig from '@config/mikro-orm.config';
 import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
 import { AmmoService } from '@content-manager/ammo/services/AmmoService';
 import { AmmoLoader } from '@content-manager/ammo/loaders/AmmoLoader';
+import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
+import { HackingDeviceEntity } from './content-manager/hacking/entities/HackingDeviceEntity';
+import { HackingProgramService } from '@content-manager/hacking/services/HackingProgramService';
+import { HackingDeviceService } from '@content-manager/hacking/services/HackingDeviceService';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
@@ -15,6 +19,10 @@ export type Container = {
   ammoRepository: EntityRepository<AmmoEntity>;
   ammoService: AmmoService;
   ammoLoader: AmmoLoader;
+  hackingProgramRepository: EntityRepository<HackingProgramEntity>;
+  hackingProgramService: HackingProgramService;
+  hackingDeviceRepository: EntityRepository<HackingDeviceEntity>;
+  hackingDeviceService: HackingDeviceService;
 };
 
 export async function createContainer(): Promise<Container> {
@@ -27,6 +35,16 @@ export async function createContainer(): Promise<Container> {
   const ammoService = new AmmoService(ammoRepository);
   const ammoLoader = new AmmoLoader(ammoService);
 
+  const hackingProgramRepository = orm.em.getRepository(HackingProgramEntity);
+  const hackingProgramService = new HackingProgramService(
+    hackingProgramRepository,
+  );
+  const hackingDeviceRepository = orm.em.getRepository(HackingDeviceEntity);
+  const hackingDeviceService = new HackingDeviceService(
+    hackingDeviceRepository,
+    hackingProgramRepository,
+  );
+
   return {
     orm,
     entityManager: orm.em,
@@ -35,5 +53,9 @@ export async function createContainer(): Promise<Container> {
     ammoRepository,
     ammoService,
     ammoLoader,
+    hackingProgramRepository,
+    hackingProgramService,
+    hackingDeviceRepository,
+    hackingDeviceService,
   };
 }

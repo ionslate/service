@@ -1,0 +1,105 @@
+enum HackingProgramTarget {
+  REM
+  TAG
+  HI
+  HACKER
+}
+
+enum HackingProgramSkillType {
+  ENTIRE_ORDER
+  SHORT_SKILL
+  ARO
+}
+
+type HackingProgram {
+  id: ID!
+  name: String!
+  link: String
+  attackMod: String
+  opponentMod: String
+  damage: String
+  burst: String
+  target: [HackingProgramTarget!]!
+  skillType: [HackingProgramSkillType!]!
+  special: String
+}
+
+input HackingProgramRequest {
+  name: String!
+  link: String
+  attackMod: String
+  opponentMod: String
+  damage: String
+  burst: String
+  target: [HackingProgramTarget!]!
+  skillType: [HackingProgramSkillType!]!
+  special: String
+}
+
+type PagedHackingPrograms {
+  content: [HackingProgram!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+type HackingDevice {
+  id: ID!
+  name: String!
+  link: String
+  programs: [HackingProgram!]!
+  validationErrors: [ValidationError!]
+}
+
+type PagedHackingDevices {
+  content: [HackingDevice!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+input HackingDeviceRequest {
+  name: String!
+  link: String
+  programIds: [ID!]!
+}
+
+extend type Query {
+  hackingDeviceById(id: ID!): HackingDevice
+  searchHackingDevices(
+    name: String!
+    page: Int
+    limit: Int
+  ): PagedHackingDevices!
+  allHackingDevices(page: Int, limit: Int): PagedHackingDevices!
+  hackingProgramById(id: ID!): HackingProgram
+  searchHackingPrograms(
+    name: String!
+    page: Int
+    limit: Int
+  ): PagedHackingPrograms!
+  allHackingPrograms(page: Int, limit: Int): PagedHackingPrograms!
+}
+
+extend type Mutation {
+  createHackingDevice(request: HackingDeviceRequest!): HackingDevice!
+  updateHackingDevice(
+    hackingDeviceId: ID!
+    request: HackingDeviceRequest!
+  ): HackingDevice!
+  addProgramToHackingDevice(
+    hackingDeviceId: ID!
+    hackingProgramId: ID!
+  ): HackingDevice!
+  removeProgramFromHackingDevice(
+    hackingDeviceId: ID!
+    hackingProgramId: ID!
+  ): ID
+  createHackingProgram(request: HackingProgramRequest!): HackingProgram!
+  updateHackingProgram(
+    hackingProgramId: ID!
+    request: HackingProgramRequest
+  ): HackingProgram!
+}
