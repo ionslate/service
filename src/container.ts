@@ -1,11 +1,11 @@
 import { EntityManager, MikroORM } from '@mikro-orm/core';
 import { EntityRepository, PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { RuleEntity } from '@content/common/entities/RuleEntity';
-import { RuleService } from '@content/common/services/RuleService';
+import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
+import { RuleService } from '@content-manager/common/services/RuleService';
 import dbConfig from '@config/mikro-orm.config';
-import { AmmoEntity } from '@content/ammo/entities/AmmoEntity';
-import { AmmoService } from '@content/ammo/services/AmmoService';
-import { AmmoLoader } from '@content/ammo/loaders/AmmoLoader';
+import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
+import { AmmoService } from '@content-manager/ammo/services/AmmoService';
+import { AmmoLoader } from '@content-manager/ammo/loaders/AmmoLoader';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;

@@ -16,8 +16,10 @@
     "baseUrl": "./src",                            
     "paths": {                                      
       "@root/*": ["*"], 
-      "@content/*": ["content/*"],
-      "@config/*": ["config/*"]
+      "@content-manager/*": ["content-manager/*"],
+      "@config/*": ["config/*"],
+      "@error/*": ["error/*"],
+      "@logger/*": ["logger/*"]
       },               
     "allowSyntheticDefaultImports": true,            
     "esModuleInterop": true,                       
