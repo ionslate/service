@@ -1,4 +1,3 @@
-import { AmmoLoader } from '@content-manager/ammo/loaders/AmmoLoader';
 import { AmmoService } from '@content-manager/ammo/services/AmmoService';
 import { RuleService } from '@content-manager/common/services/RuleService';
 import { Container } from '@root/container';
@@ -8,6 +7,8 @@ import { readFileSync } from 'fs';
 import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
+import { AmmoEntity } from './content-manager/ammo/entities/AmmoEntity';
+import Dataloader from 'dataloader';
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -55,7 +56,7 @@ export function parseSchema(): string[] {
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
-  ammoLoader: AmmoLoader;
+  combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
 };
 
 export const createContext = (
@@ -63,5 +64,5 @@ export const createContext = (
 ): ContextFunction<ExpressContext, AppContext> => () => ({
   ruleService: container.ruleService,
   ammoService: container.ammoService,
-  ammoLoader: container.ammoLoader,
+  combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
 });
