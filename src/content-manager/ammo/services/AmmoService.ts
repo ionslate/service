@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { AmmoRequest } from '@root/__generatedTypes__';
-import { AmmoEntity } from '@content/ammo/entities/AmmoEntity';
+import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
 import { Page, paginateEntites } from '@root/utils';
 import { QueryOrder } from '@mikro-orm/core';
 

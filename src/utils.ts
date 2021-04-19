@@ -1,16 +1,14 @@
+import { AmmoService } from '@content-manager/ammo/services/AmmoService';
+import { RuleService } from '@content-manager/common/services/RuleService';
+import { Container } from '@root/container';
 import { ContextFunction } from 'apollo-server-core';
 import { ExpressContext } from 'apollo-server-express';
 import { readFileSync } from 'fs';
 import globby from 'globby';
-import { GraphQLError, GraphQLFormattedError } from 'graphql';
-import { Container } from '@root/container';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
-import { RuleService } from '@content/common/services/RuleService';
-import { DriverException, TableNotFoundException } from '@mikro-orm/core';
-import { AmmoService } from '@content/ammo/services/AmmoService';
-import DataLoader from 'dataloader';
-import { AmmoEntity } from './content/ammo/entities/AmmoEntity';
+import { AmmoEntity } from './content-manager/ammo/entities/AmmoEntity';
+import Dataloader from 'dataloader';
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -55,27 +53,10 @@ export function parseSchema(): string[] {
     .map((path) => readFileSync(path, 'utf-8'));
 }
 
-export function formatError(e: GraphQLError): GraphQLFormattedError {
-  console.log(e.extensions);
-  if (
-    [DriverException.name, TableNotFoundException.name].includes(
-      e.extensions?.exception?.name,
-    )
-  ) {
-    e.message = 'Internal server error...';
-  }
-
-  return {
-    message: e.message,
-    path: e.path,
-    extensions: { code: e.extensions?.code },
-  };
-}
-
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
-  combinedAmmoLoader: DataLoader<string, AmmoEntity[], string>;
+  combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
 };
 
 export const createContext = (
