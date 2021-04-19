@@ -16,7 +16,7 @@ export const ammoSchema = new EntitySchema({
   tableName: 'ammo',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },
-    name: { type: 'string' },
+    name: { type: 'string', unique: true },
     link: { type: 'string', nullable: true },
     combinedAmmo: {
       reference: 'm:n',

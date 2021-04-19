@@ -11,6 +11,7 @@ export class RuleService {
     const ruleEntity = this.ruleRepository.create({
       name: request.name,
       link: request.link,
+      type: request.type,
     });
 
     await this.ruleRepository.persistAndFlush(ruleEntity);
@@ -24,6 +25,7 @@ export class RuleService {
     ruleEntity.assign({
       name: request.name,
       link: request.link,
+      type: request.type,
     });
 
     this.ruleRepository.persistAndFlush(ruleEntity);
@@ -41,7 +43,7 @@ export class RuleService {
     limit?: number,
   ): Promise<Page<RuleEntity>> {
     const [ruleEntities, count] = await this.ruleRepository.findAndCount(
-      { name },
+      { name: { $ilike: `%${name}%` } },
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
@@ -53,12 +55,14 @@ export class RuleService {
   }
 
   async findAllRules(page?: number, limit?: number): Promise<Page<RuleEntity>> {
-    const ruleEntities = await this.ruleRepository.findAll({
-      orderBy: { name: QueryOrder.ASC },
-      limit,
-      offset: page,
-    });
-    const count = await this.ruleRepository.count();
+    const [ruleEntities, count] = await this.ruleRepository.findAndCount(
+      {},
+      {
+        orderBy: { name: QueryOrder.ASC },
+        limit,
+        offset: page,
+      },
+    );
 
     return paginateEntites(ruleEntities, count, page, limit);
   }

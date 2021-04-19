@@ -1,4 +1,9 @@
-import { BaseEntity, Collection, EntitySchema } from '@mikro-orm/core';
+import {
+  BaseEntity,
+  Collection,
+  EntitySchema,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { generateId } from '@root/utils';
 import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
 
@@ -17,12 +22,13 @@ export const hackingDeviceSchema = new EntitySchema({
   tableName: 'hacking_device',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },
-    name: { type: 'string' },
+    name: { type: 'string', unique: true },
     link: { type: 'string', nullable: true },
     programs: {
       reference: 'm:n',
       entity: () => HackingProgramEntity,
       inversedBy: 'devices',
+      orderBy: { name: QueryOrder.ASC },
     },
   },
 });

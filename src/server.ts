@@ -5,7 +5,8 @@ import morgan from 'morgan';
 import { Container } from '@root/container';
 import ApolloLoggingPlugin from '@root/logger/ApolloLoggingPlugin';
 import LoggerStream from '@logger/LoggerStream';
-import { parseSchema, createContext } from '@root/utils';
+import { parseSchema } from '@root/utils';
+import { createContext } from '@root/container';
 import { formatApolloError } from '@error/handlers/formatApolloError';
 import { errorHandler } from '@error/handlers/errorHandler';
 import { Express } from 'express-serve-static-core';
@@ -29,7 +30,6 @@ async function app(container: Container): Promise<Express> {
     context: createContext(container),
     plugins: [new ApolloLoggingPlugin()],
     formatError: formatApolloError,
-    tracing: true,
   });
 
   graphqlServer.applyMiddleware({ app });

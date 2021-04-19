@@ -64,7 +64,7 @@ export class AmmoService {
     limit?: number,
   ): Promise<Page<AmmoEntity>> {
     const [ruleEntities, count] = await this.ammoRepository.findAndCount(
-      { name },
+      { name: { $ilike: `%${name}%` } },
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
@@ -76,12 +76,14 @@ export class AmmoService {
   }
 
   async findAllAmmo(page?: number, limit?: number): Promise<Page<AmmoEntity>> {
-    const ruleEntities = await this.ammoRepository.findAll({
-      orderBy: { name: QueryOrder.ASC },
-      limit,
-      offset: page,
-    });
-    const count = await this.ammoRepository.count();
+    const [ruleEntities, count] = await this.ammoRepository.findAndCount(
+      {},
+      {
+        orderBy: { name: QueryOrder.ASC },
+        limit,
+        offset: page,
+      },
+    );
 
     return paginateEntites(ruleEntities, count, page, limit);
   }
@@ -95,9 +97,9 @@ export class AmmoService {
     );
 
     return ammoIds.map((ammoId) =>
-      combinedAmmoEntities.filter((childAmmo) => {
-        return childAmmo.parentAmmo.getIdentifiers('id').includes(ammoId);
-      }),
+      combinedAmmoEntities.filter((childAmmo) =>
+        childAmmo.parentAmmo.getIdentifiers('id').includes(ammoId),
+      ),
     );
   }
 }

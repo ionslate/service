@@ -10,6 +10,10 @@ import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingP
 import { HackingDeviceEntity } from './content-manager/hacking/entities/HackingDeviceEntity';
 import { HackingProgramService } from '@content-manager/hacking/services/HackingProgramService';
 import { HackingDeviceService } from '@content-manager/hacking/services/HackingDeviceService';
+import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/HackingProgramLoader';
+import Dataloader from 'dataloader';
+import { ContextFunction } from 'apollo-server-core';
+import { ExpressContext } from 'apollo-server-express';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
@@ -23,6 +27,7 @@ export type Container = {
   hackingProgramService: HackingProgramService;
   hackingDeviceRepository: EntityRepository<HackingDeviceEntity>;
   hackingDeviceService: HackingDeviceService;
+  hackingProgramLoader: HackingProgramLoader;
 };
 
 export async function createContainer(): Promise<Container> {
@@ -44,6 +49,7 @@ export async function createContainer(): Promise<Container> {
     hackingDeviceRepository,
     hackingProgramRepository,
   );
+  const hackingProgramLoader = new HackingProgramLoader(hackingProgramService);
 
   return {
     orm,
@@ -57,5 +63,26 @@ export async function createContainer(): Promise<Container> {
     hackingProgramService,
     hackingDeviceRepository,
     hackingDeviceService,
+    hackingProgramLoader,
   };
 }
+
+export type AppContext = {
+  ruleService: RuleService;
+  ammoService: AmmoService;
+  combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
+  hackingProgramService: HackingProgramService;
+  hackingDeviceService: HackingDeviceService;
+  hackingProgramLoader: Dataloader<string, HackingProgramEntity[], string>;
+};
+
+export const createContext = (
+  container: Container,
+): ContextFunction<ExpressContext, AppContext> => () => ({
+  ruleService: container.ruleService,
+  ammoService: container.ammoService,
+  combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
+  hackingProgramService: container.hackingProgramService,
+  hackingDeviceService: container.hackingDeviceService,
+  hackingProgramLoader: container.hackingProgramLoader.createHackingProgramLoader(),
+});

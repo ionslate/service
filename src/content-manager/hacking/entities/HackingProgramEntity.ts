@@ -31,7 +31,7 @@ export const hackingProgramSchema = new EntitySchema({
   tableName: 'hacking_program',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },
-    name: { type: 'string' },
+    name: { type: 'string', unique: true },
     link: { type: 'string', nullable: true },
     attackMod: { type: 'string', nullable: true },
     opponentMod: { type: 'string', nullable: true },
@@ -39,7 +39,7 @@ export const hackingProgramSchema = new EntitySchema({
     burst: { type: 'string', nullable: true },
     target: { enum: true, array: true },
     skillType: { enum: true, array: true },
-    special: { type: 'string', nullable: true },
+    special: { type: 'string', columnType: 'text', nullable: true },
     devices: {
       reference: 'm:n',
       entity: () => HackingDeviceEntity,
