@@ -8,7 +8,7 @@ generates:
       contextType: AppContext
       mappers:
         Rule: '@content-manager/common/entities/RuleEntity#RuleEntity'
-        Ammo: '@content-manager/ammo/entities/AmmoEntity#AmmoEntity'
+        Ammo: '@content-manager/weapons/entities/AmmoEntity#AmmoEntity'
         HackingProgram: '@content-manager/hacking/entities/HackingProgramEntity#HackingProgramEntity'
         HackingDevice: '@content-manager/hacking/entities/HackingDeviceEntity#HackingDeviceEntity'
     plugins:

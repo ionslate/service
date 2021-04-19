@@ -3,6 +3,10 @@ type ValidationError {
   description: String!
 }
 
+input Search {
+  name: String!
+}
+
 type Query {
   _empty: Int
 }

@@ -44,59 +44,16 @@ type PagedHackingPrograms {
   last: Boolean!
 }
 
-type HackingDevice {
-  id: ID!
-  name: String!
-  link: String
-  programs: [HackingProgram!]!
-  validationErrors: [ValidationError!]
-}
-
-type PagedHackingDevices {
-  content: [HackingDevice!]!
-  limit: Int
-  count: Int!
-  page: Int!
-  last: Boolean!
-}
-
-input HackingDeviceRequest {
-  name: String!
-  link: String
-  programIds: [ID!]!
-}
-
 extend type Query {
-  hackingDeviceById(hackingDeviceId: ID!): HackingDevice
-  searchHackingDevices(
-    name: String!
-    page: Int
-    limit: Int
-  ): PagedHackingDevices!
-  allHackingDevices(page: Int, limit: Int): PagedHackingDevices!
   hackingProgramById(hackingProgramId: ID!): HackingProgram
-  searchHackingPrograms(
-    name: String!
+  hackingProgramsList(
+    search: Search
     page: Int
     limit: Int
   ): PagedHackingPrograms!
-  allHackingPrograms(page: Int, limit: Int): PagedHackingPrograms!
 }
 
 extend type Mutation {
-  createHackingDevice(request: HackingDeviceRequest!): HackingDevice!
-  updateHackingDevice(
-    hackingDeviceId: ID!
-    request: HackingDeviceRequest!
-  ): HackingDevice!
-  addProgramToHackingDevice(
-    hackingDeviceId: ID!
-    hackingProgramId: ID!
-  ): HackingDevice!
-  removeProgramFromHackingDevice(
-    hackingDeviceId: ID!
-    hackingProgramId: ID!
-  ): ID
   createHackingProgram(request: HackingProgramRequest!): HackingProgram!
   updateHackingProgram(
     hackingProgramId: ID!

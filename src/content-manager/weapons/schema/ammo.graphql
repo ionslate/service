@@ -21,8 +21,7 @@ input AmmoRequest {
 
 extend type Query {
   ammoById(ammoId: ID!): Ammo
-  searchAmmo(name: String!, page: Int, limit: Int): PagedAmmo!
-  allAmmo(page: Int, limit: Int): PagedAmmo!
+  ammoList(search: Search, page: Int, limit: Int): PagedAmmo!
 }
 
 extend type Mutation {

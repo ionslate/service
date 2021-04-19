@@ -4,10 +4,12 @@ export default {
   Query: {
     ammoById: (_, { ammoId }, { ammoService }) =>
       ammoService.findAmmoById(ammoId),
-    allAmmo: (_, { page, limit }, { ammoService }) =>
-      ammoService.findAllAmmo(page || undefined, limit || undefined),
-    searchAmmo: (_, { name, page, limit }, { ammoService }) =>
-      ammoService.findAmmoByName(name, page || undefined, limit || undefined),
+    ammoList: (_, { search, page, limit }, { ammoService }) =>
+      ammoService.getAmmoList(
+        search || undefined,
+        page || undefined,
+        limit || undefined,
+      ),
   },
   Mutation: {
     createAmmo: (_, { request }, { ammoService }) =>
