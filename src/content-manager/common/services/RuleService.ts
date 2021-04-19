@@ -1,4 +1,4 @@
-import { RuleEntity } from '@content/common/entities/RuleEntity';
+import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
 import { QueryOrder } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';

@@ -1,4 +1,4 @@
-import ruleResolver from '@content/common/resolvers/ruleResolver';
-import ammoResolver from '@content/ammo/resolvers/ammoResolver';
+import ruleResolver from '@content-manager/common/resolvers/ruleResolver';
+import ammoResolver from '@content-manager/ammo/resolvers/ammoResolver';
 
 export default [ruleResolver, ammoResolver];

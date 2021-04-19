@@ -1,4 +1,4 @@
-import { AmmoService } from '@content/ammo/services/AmmoService';
+import { AmmoService } from '@content-manager/ammo/services/AmmoService';
 import Dataloader from 'dataloader';
 
 export class AmmoLoader {

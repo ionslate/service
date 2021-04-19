@@ -1,6 +1,6 @@
 import { BaseEntity, Collection, EntitySchema } from '@mikro-orm/core';
 import { generateId } from '@root/utils';
-import { RuleEntity } from '@content/common/entities/RuleEntity';
+import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
 
 export class AmmoEntity extends BaseEntity<RuleEntity, 'id'> {
   id!: string;
@@ -28,6 +28,7 @@ export const ammoSchema = new EntitySchema({
       reference: 'm:n',
       entity: () => AmmoEntity,
       mappedBy: 'combinedAmmo',
+      hidden: true,
     },
   },
 });
