@@ -1,6 +1,6 @@
 import { AmmoService } from '@content-manager/ammo/services/AmmoService';
 import Dataloader from 'dataloader';
-import { AmmoEntity } from '../entities/AmmoEntity';
+import { AmmoEntity } from '@content-manager/ammo/entities/AmmoEntity';
 
 export class AmmoLoader {
   constructor(private ammoService: AmmoService) {}

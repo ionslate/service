@@ -2,7 +2,8 @@ import { Resolvers } from '@root/__generatedTypes__';
 
 export default {
   Query: {
-    ammoById: (_, { id }, { ammoService }) => ammoService.findAmmoById(id),
+    ammoById: (_, { ammoId }, { ammoService }) =>
+      ammoService.findAmmoById(ammoId),
     allAmmo: (_, { page, limit }, { ammoService }) =>
       ammoService.findAllAmmo(page || undefined, limit || undefined),
     searchAmmo: (_, { name, page, limit }, { ammoService }) =>

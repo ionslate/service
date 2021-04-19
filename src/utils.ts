@@ -1,14 +1,7 @@
-import { AmmoService } from '@content-manager/ammo/services/AmmoService';
-import { RuleService } from '@content-manager/common/services/RuleService';
-import { Container } from '@root/container';
-import { ContextFunction } from 'apollo-server-core';
-import { ExpressContext } from 'apollo-server-express';
 import { readFileSync } from 'fs';
 import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
-import { AmmoEntity } from './content-manager/ammo/entities/AmmoEntity';
-import Dataloader from 'dataloader';
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -27,7 +20,7 @@ export const paginateEntites = async <T>(
   limit?: number,
 ): Promise<Page<T>> => {
   if (limit) {
-    const pageCount = Math.ceil(count / limit);
+    const pageCount = Math.ceil(count / limit) - 1;
 
     return {
       content: entities,
@@ -52,17 +45,3 @@ export function parseSchema(): string[] {
     .sync('src/**/*.graphql')
     .map((path) => readFileSync(path, 'utf-8'));
 }
-
-export type AppContext = {
-  ruleService: RuleService;
-  ammoService: AmmoService;
-  combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
-};
-
-export const createContext = (
-  container: Container,
-): ContextFunction<ExpressContext, AppContext> => () => ({
-  ruleService: container.ruleService,
-  ammoService: container.ammoService,
-  combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
-});

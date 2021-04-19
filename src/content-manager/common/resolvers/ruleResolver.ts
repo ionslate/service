@@ -2,7 +2,8 @@ import { Resolvers } from '@root/__generatedTypes__';
 
 export default {
   Query: {
-    ruleById: (_, { id }, { ruleService }) => ruleService.findRuleById(id),
+    ruleById: (_, { ruleId }, { ruleService }) =>
+      ruleService.findRuleById(ruleId),
     searchRules: (_, { name, page, limit }, { ruleService }) =>
       ruleService.findRulesByName(name, page || undefined, limit || undefined),
     allRules: (
