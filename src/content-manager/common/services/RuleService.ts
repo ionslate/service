@@ -28,7 +28,7 @@ export class RuleService {
       type: request.type,
     });
 
-    this.ruleRepository.persistAndFlush(ruleEntity);
+    await this.ruleRepository.persistAndFlush(ruleEntity);
 
     return ruleEntity;
   }

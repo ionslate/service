@@ -6,9 +6,9 @@ export default {
       ammoService.findAmmoById(ammoId),
     ammoList: (_, { search, page, limit }, { ammoService }) =>
       ammoService.getAmmoList(
-        search || undefined,
-        page || undefined,
-        limit || undefined,
+        search ?? undefined,
+        page ?? undefined,
+        limit ?? undefined,
       ),
   },
   Mutation: {

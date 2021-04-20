@@ -6,9 +6,9 @@ export default {
       ruleService.findRuleById(ruleId),
     rulesList: (_, { search, page, limit }, { ruleService }) =>
       ruleService.getRulesList(
-        search || undefined,
-        page || undefined,
-        limit || undefined,
+        search ?? undefined,
+        page ?? undefined,
+        limit ?? undefined,
       ),
   },
   Mutation: {

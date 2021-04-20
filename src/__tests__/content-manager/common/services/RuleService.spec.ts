@@ -5,17 +5,17 @@ import {
 import { RuleService } from '@content-manager/common/services/RuleService';
 import { MikroORM } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { IBackup, newDb } from 'pg-mem';
+import { IBackup, newDb, IMemoryDb } from 'pg-mem';
 import { findOneOrFailHandler } from '@root/utils';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
 
+let db: IMemoryDb;
 let orm: MikroORM;
 let ruleService: RuleService;
-let ruleRepository: EntityRepository<RuleEntity>;
 let backup: IBackup;
 
 beforeAll(async () => {
-  const db = newDb();
+  db = newDb();
   orm = await db.adapters.createMikroOrm({
     entities: [ruleSchema],
     findOneOrFailHandler,
@@ -23,7 +23,9 @@ beforeAll(async () => {
 
   await orm.getSchemaGenerator().createSchema();
 
-  ruleRepository = orm.em.getRepository(RuleEntity);
+  const ruleRepository: EntityRepository<RuleEntity> = orm.em.getRepository(
+    RuleEntity,
+  );
   ruleService = new RuleService(ruleRepository);
   backup = db.backup();
 });
@@ -42,24 +44,30 @@ describe('RuleService', () => {
         type: 'MOTORCYCLE',
       });
 
-      const foundRule = await ruleRepository.findOneOrFail({ id: newRule.id });
-      expect(foundRule.toObject()).toEqual({
-        id: expect.any(String),
-        name: 'Motorcycle',
-        link: 'http://motorcycle.example.com',
-        type: 'MOTORCYCLE',
-      });
+      const ruleRow = db.public.one(
+        `SELECT * FROM rule WHERE id = '${newRule.id}'`,
+      );
+
+      expect(ruleRow).toEqual(
+        expect.objectContaining({
+          name: 'Motorcycle',
+          link: 'http://motorcycle.example.com',
+          type: 'MOTORCYCLE',
+        }),
+      );
     });
   });
 
   describe('updateRule', () => {
     it('should update a rule', async () => {
-      const rule = ruleRepository.create({
+      const rule = {
+        id: '1234',
         name: 'Motorcycle',
         link: 'http://motorcycle.example.com',
         type: 'MOTORCYCLE',
-      });
-      await ruleRepository.persistAndFlush(rule);
+      };
+
+      db.getTable('rule').insert(rule);
 
       const updatedRule = await ruleService.updateRule(rule.id, {
         name: 'AI Motorcycle',
@@ -67,34 +75,31 @@ describe('RuleService', () => {
         type: 'MOTORCYCLE',
       });
 
-      const foundRule = await ruleRepository.findOneOrFail({
-        id: updatedRule.id,
-      });
-      expect(foundRule.toObject()).toEqual(rule.toObject());
+      const ruleRow = db.public.one(
+        `SELECT * FROM rule WHERE id = '${rule.id}'`,
+      );
+
+      expect(ruleRow).toEqual(expect.objectContaining(updatedRule.toObject()));
     });
   });
 
   describe('findRuleById', () => {
     it('should find the rule by id', async () => {
-      const rule = ruleRepository.create({
+      const rule = {
+        id: '1234',
         name: 'Motorcycle',
         link: 'http://motorcycle.example.com',
         type: 'MOTORCYCLE',
-      });
-      await ruleRepository.persistAndFlush(rule);
+      };
+
+      db.getTable('rule').insert(rule);
 
       const foundRule = await ruleService.findRuleById(rule.id);
 
-      expect(foundRule?.toObject()).toEqual(rule.toObject());
+      expect(foundRule?.toObject()).toEqual(rule);
     });
 
     it('should throw an error if the rule does not exist', async () => {
-      const rule = ruleRepository.create({
-        name: 'Motorcycle',
-        link: 'http://motorcycle.example.com',
-        type: 'MOTORCYCLE',
-      });
-      await ruleRepository.persistAndFlush(rule);
       return await ruleService.findRuleById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
         expect(e.message).toBe('Rule not found');
@@ -104,20 +109,27 @@ describe('RuleService', () => {
 
   describe('getRulesList', () => {
     it('should return a paginated list of rules if page and limit are provided', async () => {
-      const rule1 = ruleRepository.create({
+      const rule1 = {
+        id: '1',
         name: 'Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule1);
-      const rule2 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule1);
+      const rule2 = {
+        id: '2',
         name: 'AI Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule2);
-      const rule3 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule2);
+      const rule3 = {
+        id: '3',
+        link: null,
         name: 'Stealth',
-      });
-      await ruleRepository.persistAndFlush(rule3);
+        type: null,
+      };
+      db.getTable('rule').insert(rule3);
 
       const rulePage = await ruleService.getRulesList(undefined, 0, 1);
 
@@ -125,26 +137,31 @@ describe('RuleService', () => {
       expect(rulePage.last).toBeFalsy();
       expect(rulePage.limit).toBe(1);
       expect(rulePage.page).toBe(0);
-      expect(rulePage.content.map((rule) => rule.toObject())).toEqual([
-        rule2.toObject(),
-      ]);
+      expect(rulePage.content.map((rule) => rule.toObject())).toEqual([rule2]);
     });
 
     it('should return all rules when no arguments are provided', async () => {
-      const rule1 = ruleRepository.create({
+      const rule1 = {
+        id: '1',
         name: 'Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule1);
-      const rule2 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule1);
+      const rule2 = {
+        id: '2',
         name: 'AI Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule2);
-      const rule3 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule2);
+      const rule3 = {
+        id: '3',
+        link: null,
         name: 'Stealth',
-      });
-      await ruleRepository.persistAndFlush(rule3);
+        type: null,
+      };
+      db.getTable('rule').insert(rule3);
 
       const rulePage = await ruleService.getRulesList();
 
@@ -153,27 +170,34 @@ describe('RuleService', () => {
       expect(rulePage.limit).toBeUndefined();
       expect(rulePage.page).toBe(0);
       expect(rulePage.content.map((rule) => rule.toObject())).toEqual([
-        rule2.toObject(),
-        rule1.toObject(),
-        rule3.toObject(),
+        rule2,
+        rule1,
+        rule3,
       ]);
     });
 
     it('should return a filtered list of rules when serch is provided', async () => {
-      const rule1 = ruleRepository.create({
+      const rule1 = {
+        id: '1',
         name: 'Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule1);
-      const rule2 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule1);
+      const rule2 = {
+        id: '2',
         name: 'AI Motorcycle',
+        link: null,
         type: 'MOTORCYCLE',
-      });
-      ruleRepository.persist(rule2);
-      const rule3 = ruleRepository.create({
+      };
+      db.getTable('rule').insert(rule2);
+      const rule3 = {
+        id: '3',
+        link: null,
         name: 'Stealth',
-      });
-      await ruleRepository.persistAndFlush(rule3);
+        type: null,
+      };
+      db.getTable('rule').insert(rule3);
 
       const rulePage = await ruleService.getRulesList({ name: 'AI' });
 
@@ -181,9 +205,7 @@ describe('RuleService', () => {
       expect(rulePage.last).toBeTruthy();
       expect(rulePage.limit).toBeUndefined();
       expect(rulePage.page).toBe(0);
-      expect(rulePage.content.map((rule) => rule.toObject())).toEqual([
-        rule2.toObject(),
-      ]);
+      expect(rulePage.content.map((rule) => rule.toObject())).toEqual([rule2]);
     });
   });
 });

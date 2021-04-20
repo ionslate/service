@@ -10,9 +10,9 @@ export default {
       { hackingDeviceService },
     ) =>
       hackingDeviceService.getHackingDevicesList(
-        search || undefined,
-        page || undefined,
-        limit || undefined,
+        search ?? undefined,
+        page ?? undefined,
+        limit ?? undefined,
       ),
   },
   Mutation: {

@@ -1,10 +1,13 @@
 import { BaseEntity, Dictionary } from '@mikro-orm/core';
 import { IPrimaryKeyValue } from '@mikro-orm/core/typings';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs';
+import { promisify } from 'util';
 import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+
+const asyncReadFile = promisify(readFile);
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -43,10 +46,9 @@ export const paginateEntites = <T extends BaseEntity<T, keyof T, T>>(
   };
 };
 
-export function parseSchema(): string[] {
-  return globby
-    .sync('src/**/*.graphql')
-    .map((path) => readFileSync(path, 'utf-8'));
+export async function parseSchema(): Promise<string[]> {
+  const paths = await globby('src/**/*.graphql');
+  return await Promise.all(paths.map((path) => asyncReadFile(path, 'utf-8')));
 }
 
 export function findOneOrFailHandler(

@@ -7,7 +7,7 @@ import { AmmoEntity } from '@root/content-manager/weapons/entities/AmmoEntity';
 import { AmmoService } from '@root/content-manager/weapons/services/AmmoService';
 import { AmmoLoader } from '@root/content-manager/weapons/loaders/AmmoLoader';
 import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
-import { HackingDeviceEntity } from './content-manager/hacking/entities/HackingDeviceEntity';
+import { HackingDeviceEntity } from '@content-manager/hacking/entities/HackingDeviceEntity';
 import { HackingProgramService } from '@content-manager/hacking/services/HackingProgramService';
 import { HackingDeviceService } from '@content-manager/hacking/services/HackingDeviceService';
 import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/HackingProgramLoader';
