@@ -181,13 +181,13 @@ export type PagedRules = {
 export type Query = {
   __typename?: 'Query';
   _empty?: Maybe<Scalars['Int']>;
-  ammoById?: Maybe<Ammo>;
+  ammoById: Ammo;
   ammoList: PagedAmmo;
-  hackingDeviceById?: Maybe<HackingDevice>;
+  hackingDeviceById: HackingDevice;
   hackingDevicesList: PagedHackingDevices;
-  hackingProgramById?: Maybe<HackingProgram>;
+  hackingProgramById: HackingProgram;
   hackingProgramsList: PagedHackingPrograms;
-  ruleById?: Maybe<Rule>;
+  ruleById: Rule;
   rulesList: PagedRules;
 };
 
@@ -483,13 +483,13 @@ export type PagedRulesResolvers<ContextType = AppContext, ParentType extends Res
 
 export type QueryResolvers<ContextType = AppContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   _empty?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  ammoById?: Resolver<Maybe<ResolversTypes['Ammo']>, ParentType, ContextType, RequireFields<QueryAmmoByIdArgs, 'ammoId'>>;
+  ammoById?: Resolver<ResolversTypes['Ammo'], ParentType, ContextType, RequireFields<QueryAmmoByIdArgs, 'ammoId'>>;
   ammoList?: Resolver<ResolversTypes['PagedAmmo'], ParentType, ContextType, RequireFields<QueryAmmoListArgs, never>>;
-  hackingDeviceById?: Resolver<Maybe<ResolversTypes['HackingDevice']>, ParentType, ContextType, RequireFields<QueryHackingDeviceByIdArgs, 'hackingDeviceId'>>;
+  hackingDeviceById?: Resolver<ResolversTypes['HackingDevice'], ParentType, ContextType, RequireFields<QueryHackingDeviceByIdArgs, 'hackingDeviceId'>>;
   hackingDevicesList?: Resolver<ResolversTypes['PagedHackingDevices'], ParentType, ContextType, RequireFields<QueryHackingDevicesListArgs, never>>;
-  hackingProgramById?: Resolver<Maybe<ResolversTypes['HackingProgram']>, ParentType, ContextType, RequireFields<QueryHackingProgramByIdArgs, 'hackingProgramId'>>;
+  hackingProgramById?: Resolver<ResolversTypes['HackingProgram'], ParentType, ContextType, RequireFields<QueryHackingProgramByIdArgs, 'hackingProgramId'>>;
   hackingProgramsList?: Resolver<ResolversTypes['PagedHackingPrograms'], ParentType, ContextType, RequireFields<QueryHackingProgramsListArgs, never>>;
-  ruleById?: Resolver<Maybe<ResolversTypes['Rule']>, ParentType, ContextType, RequireFields<QueryRuleByIdArgs, 'ruleId'>>;
+  ruleById?: Resolver<ResolversTypes['Rule'], ParentType, ContextType, RequireFields<QueryRuleByIdArgs, 'ruleId'>>;
   rulesList?: Resolver<ResolversTypes['PagedRules'], ParentType, ContextType, RequireFields<QueryRulesListArgs, never>>;
 }>;
 

@@ -54,8 +54,8 @@ export class AmmoService {
     );
   }
 
-  async findAmmoById(ammoId: string): Promise<AmmoEntity | null> {
-    return await this.ammoRepository.findOne({ id: ammoId });
+  async findAmmoById(ammoId: string): Promise<AmmoEntity> {
+    return await this.ammoRepository.findOneOrFail({ id: ammoId });
   }
 
   async getAmmoList(
@@ -63,7 +63,7 @@ export class AmmoService {
     page?: number,
     limit?: number,
   ): Promise<Page<AmmoEntity>> {
-    const [ruleEntities, count] = await this.ammoRepository.findAndCount(
+    const [ammoEntities, count] = await this.ammoRepository.findAndCount(
       search ? { name: { $ilike: `%${search.name}%` } } : {},
       {
         orderBy: { name: QueryOrder.ASC },
@@ -72,7 +72,7 @@ export class AmmoService {
       },
     );
 
-    return paginateEntites(ruleEntities, count, page, limit);
+    return paginateEntites(ammoEntities, count, page, limit);
   }
 
   async getCombinedAmmoByAmmoIds(ammoIds: string[]): Promise<AmmoEntity[][]> {

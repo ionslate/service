@@ -33,8 +33,8 @@ export class RuleService {
     return ruleEntity;
   }
 
-  async findRuleById(ruleId: string): Promise<RuleEntity | null> {
-    return await this.ruleRepository.findOne({ id: ruleId });
+  async findRuleById(ruleId: string): Promise<RuleEntity> {
+    return await this.ruleRepository.findOneOrFail({ id: ruleId });
   }
 
   async getRulesList(

@@ -60,8 +60,10 @@ export class HackingDeviceService {
 
   async findHackingDevicById(
     hackingDeviceId: string,
-  ): Promise<HackingDeviceEntity | null> {
-    return await this.hackingDeviceRepository.findOne({ id: hackingDeviceId });
+  ): Promise<HackingDeviceEntity> {
+    return await this.hackingDeviceRepository.findOneOrFail({
+      id: hackingDeviceId,
+    });
   }
 
   async getHackingDevicesList(
