@@ -1,0 +1,35 @@
+name: Build and test
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+        node-version:
+          - 12.x
+    steps:         
+      - name: Checkout
+        uses: actions/checkout@master
+        
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          
+      - name: Install Packages
+        run: yarn install
+      
+      - name: Run Lint
+        run: yarn lint
+              
+      - name: Run Test
+        run: yarn test:ci
+        
+      - name: Run Build
+        run: yarn build
