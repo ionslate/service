@@ -30,6 +30,9 @@ jobs:
       
       - name: Run Lint
         run: yarn lint
+        
+      - name: Generate Types
+        run: yarn codegen
               
       - name: Run Test
         run: yarn test:ci
