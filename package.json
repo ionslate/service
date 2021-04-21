@@ -26,6 +26,7 @@
     ]
   },
   "dependencies": {
+    "@mikro-orm/core": "^4.5.3",
     "@mikro-orm/postgresql": "^4.5.3",
     "@types/nanoid-dictionary": "^4.2.0",
     "apollo-server-express": "^2.23.0",
