@@ -48,9 +48,9 @@ describe('ruleResolver', () => {
       async ({ search, searchArg, page, pageArg, limit, limitArg }) => {
         const ruleService = { getRulesList: jest.fn() };
         ruleService.getRulesList.mockResolvedValue({
-          limit: null,
+          limit,
           count: 1,
-          page: 0,
+          page: page || 0,
           last: true,
           content: [{ id: '1234', name: 'Motorcyle', type: 'MOTORCYLE' }],
         });

@@ -22,8 +22,16 @@ module.exports = {
   testPathIgnorePatterns: [
     '/dist',
     '/coverage',
-    '/__testUtils__/',
+    '/src/__tests__/__testUtils__',
     '/node_modules',
+    '/src/__migrations__',
+  ],
+  coveragePathIgnorePatterns: [
+    '/dist',
+    '/coverage',
+    '/src/__tests__/__testUtils__',
+    '/node_modules',
+    '/src/__migrations__',
   ],
   testMatch: ['**/src/**/?(*.)+(spec|test).[jt]s?(x)'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setupTests.ts'],

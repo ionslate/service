@@ -3,7 +3,7 @@ import { Resolvers } from '@root/__generatedTypes__';
 export default {
   Query: {
     hackingDeviceById: (_, { hackingDeviceId }, { hackingDeviceService }) =>
-      hackingDeviceService.findHackingDevicById(hackingDeviceId),
+      hackingDeviceService.findHackingDeviceById(hackingDeviceId),
     hackingDevicesList: (
       _,
       { search, page, limit },

@@ -58,7 +58,7 @@ export class HackingDeviceService {
     return hackingDeviceEntity;
   }
 
-  async findHackingDevicById(
+  async findHackingDeviceById(
     hackingDeviceId: string,
   ): Promise<HackingDeviceEntity> {
     return await this.hackingDeviceRepository.findOneOrFail({

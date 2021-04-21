@@ -96,7 +96,7 @@ describe('RuleService', () => {
 
       const foundRule = await ruleService.findRuleById(rule.id);
 
-      expect(foundRule?.toObject()).toEqual(rule);
+      expect(foundRule.toObject()).toEqual(rule);
     });
 
     it('should throw an error if the rule does not exist', async () => {
