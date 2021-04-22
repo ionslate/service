@@ -2,7 +2,7 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { AmmoRequest, Search } from '@root/__generatedTypes__';
 import { AmmoEntity } from '@root/content-manager/weapons/entities/AmmoEntity';
 import { Page, paginateEntites } from '@root/utils';
-import { QueryOrder } from '@mikro-orm/core';
+import { QueryOrder, LoadStrategy } from '@mikro-orm/core';
 
 export class AmmoService {
   constructor(private ammoRepository: EntityRepository<AmmoEntity>) {}
@@ -76,7 +76,12 @@ export class AmmoService {
       {
         parentAmmo: { id: { $in: ammoIds } },
       },
-      ['parentAmmo'],
+      {
+        populate: {
+          parentAmmo: true,
+        },
+        strategy: LoadStrategy.JOINED,
+      },
     );
 
     return ammoIds.map((ammoId) =>
