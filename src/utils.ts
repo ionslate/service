@@ -1,11 +1,11 @@
-import { BaseEntity, Dictionary } from '@mikro-orm/core';
+import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { Dictionary } from '@mikro-orm/core';
 import { IPrimaryKeyValue } from '@mikro-orm/core/typings';
 import { readFile } from 'fs';
-import { promisify } from 'util';
 import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
-import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { promisify } from 'util';
 
 const asyncReadFile = promisify(readFile);
 
@@ -19,7 +19,7 @@ export type Page<T> = {
   last: boolean;
 };
 
-export const paginateEntites = <T extends BaseEntity<T, keyof T, T>>(
+export const paginateEntites = <T>(
   entities: T[],
   count: number,
   page?: number,

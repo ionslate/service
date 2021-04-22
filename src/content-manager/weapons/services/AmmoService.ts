@@ -43,15 +43,11 @@ export class AmmoService {
     combinedAmmoIds: string[],
     ammoEntity: AmmoEntity,
   ): Promise<void> {
-    const combinedAmmoEntities = await Promise.all(
-      combinedAmmoIds.map((ammoId) =>
-        this.ammoRepository.findOneOrFail({ id: ammoId }),
-      ),
-    );
+    const combinedAmmoEntities = await this.ammoRepository.find({
+      id: { $in: combinedAmmoIds },
+    });
 
-    await Promise.all(
-      combinedAmmoEntities.map((ammo) => ammoEntity.combinedAmmo.add(ammo)),
-    );
+    ammoEntity.combinedAmmo.add(...combinedAmmoEntities);
   }
 
   async findAmmoById(ammoId: string): Promise<AmmoEntity> {
