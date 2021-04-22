@@ -1,31 +1,77 @@
-import { Resolvers } from '@root/__generatedTypes__';
+import {
+  Resolvers,
+  QueryResolvers,
+  MutationResolvers,
+  HackingDeviceResolvers,
+} from '@root/__generatedTypes__';
+
+const hackingDeviceById: QueryResolvers['hackingDeviceById'] = async (
+  _,
+  { hackingDeviceId },
+  { hackingDeviceService },
+) => {
+  const hackingDeviceEntity = await hackingDeviceService.findHackingDeviceById(
+    hackingDeviceId,
+  );
+
+  return hackingDeviceEntity as never;
+};
+
+const hackingDevicesList: QueryResolvers['hackingDevicesList'] = async (
+  _,
+  { search, page, limit },
+  { hackingDeviceService },
+) => {
+  const pagedHackingDevicesEntities = await hackingDeviceService.getHackingDevicesList(
+    search ?? undefined,
+    page ?? undefined,
+    limit ?? undefined,
+  );
+
+  return pagedHackingDevicesEntities as never;
+};
+
+const createHackingDevice: MutationResolvers['createHackingDevice'] = async (
+  _,
+  { request },
+  { hackingDeviceService },
+) => {
+  const hackingDeviceEntity = await hackingDeviceService.createHackingDevice(
+    request,
+  );
+
+  return hackingDeviceEntity as never;
+};
+
+const updateHackingDevice: MutationResolvers['updateHackingDevice'] = async (
+  _,
+  { hackingDeviceId, request },
+  { hackingDeviceService },
+) => {
+  const hackingDeviceEntity = await hackingDeviceService.updateHackingDevice(
+    hackingDeviceId,
+    request,
+  );
+
+  return hackingDeviceEntity as never;
+};
+
+const programs: HackingDeviceResolvers['programs'] = (
+  hackingDeviceEntity,
+  _,
+  { hackingProgramLoader },
+) => hackingProgramLoader.load(hackingDeviceEntity.id);
 
 export default {
   Query: {
-    hackingDeviceById: (_, { hackingDeviceId }, { hackingDeviceService }) =>
-      hackingDeviceService.findHackingDevicById(hackingDeviceId),
-    hackingDevicesList: (
-      _,
-      { search, page, limit },
-      { hackingDeviceService },
-    ) =>
-      hackingDeviceService.getHackingDevicesList(
-        search || undefined,
-        page || undefined,
-        limit || undefined,
-      ),
+    hackingDeviceById,
+    hackingDevicesList,
   },
   Mutation: {
-    createHackingDevice: (_, { request }, { hackingDeviceService }) =>
-      hackingDeviceService.createHackingDevice(request),
-    updateHackingDevice: (
-      _,
-      { hackingDeviceId, request },
-      { hackingDeviceService },
-    ) => hackingDeviceService.updateHackingDevice(hackingDeviceId, request),
+    createHackingDevice,
+    updateHackingDevice,
   },
   HackingDevice: {
-    programs: (hackingDeviceEntity, _, { hackingProgramLoader }) =>
-      hackingProgramLoader.load(hackingDeviceEntity.id),
+    programs,
   },
 } as Resolvers;

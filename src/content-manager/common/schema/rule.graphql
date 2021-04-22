@@ -32,7 +32,7 @@ input RuleRequest {
 }
 
 extend type Query {
-  ruleById(ruleId: ID!): Rule
+  ruleById(ruleId: ID!): Rule!
   rulesList(search: Search, page: Int, limit: Int): PagedRules!
 }
 

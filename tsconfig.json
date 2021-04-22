@@ -19,7 +19,8 @@
       "@content-manager/*": ["content-manager/*"],
       "@config/*": ["config/*"],
       "@error/*": ["error/*"],
-      "@logger/*": ["logger/*"]
+      "@logger/*": ["logger/*"],
+      "@test-utils/*": ["__tests__/__testUtils__/*"]
       },               
     "allowSyntheticDefaultImports": true,            
     "esModuleInterop": true,                       

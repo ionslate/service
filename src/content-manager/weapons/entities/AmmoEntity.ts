@@ -1,8 +1,7 @@
 import { BaseEntity, Collection, EntitySchema } from '@mikro-orm/core';
 import { generateId } from '@root/utils';
-import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
 
-export class AmmoEntity extends BaseEntity<RuleEntity, 'id'> {
+export class AmmoEntity extends BaseEntity<AmmoEntity, 'id'> {
   id!: string;
   name!: string;
   link?: string | null;

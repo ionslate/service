@@ -1,7 +1,13 @@
-import { readFileSync } from 'fs';
+import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { Dictionary } from '@mikro-orm/core';
+import { IPrimaryKeyValue } from '@mikro-orm/core/typings';
+import { readFile } from 'fs';
 import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
+import { promisify } from 'util';
+
+const asyncReadFile = promisify(readFile);
 
 export const generateId = customAlphabet(nolookalikesSafe, 12);
 
@@ -13,12 +19,12 @@ export type Page<T> = {
   last: boolean;
 };
 
-export const paginateEntites = async <T>(
+export const paginateEntites = <T>(
   entities: T[],
   count: number,
   page?: number,
   limit?: number,
-): Promise<Page<T>> => {
+): Page<T> => {
   if (limit) {
     const pageCount = Math.ceil(count / limit) - 1;
 
@@ -40,8 +46,14 @@ export const paginateEntites = async <T>(
   };
 };
 
-export function parseSchema(): string[] {
-  return globby
-    .sync('src/**/*.graphql')
-    .map((path) => readFileSync(path, 'utf-8'));
+export async function parseSchema(): Promise<string[]> {
+  const paths = await globby('src/**/*.graphql');
+  return await Promise.all(paths.map((path) => asyncReadFile(path, 'utf-8')));
+}
+
+export function findOneOrFailHandler(
+  entityName: string,
+  _where: Dictionary<never> | IPrimaryKeyValue,
+): ResourceNotFound {
+  return new ResourceNotFound(`${entityName.replace('Entity', '')} not found`);
 }

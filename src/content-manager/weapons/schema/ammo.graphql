@@ -20,7 +20,7 @@ input AmmoRequest {
 }
 
 extend type Query {
-  ammoById(ammoId: ID!): Ammo
+  ammoById(ammoId: ID!): Ammo!
   ammoList(search: Search, page: Int, limit: Int): PagedAmmo!
 }
 

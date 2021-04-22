@@ -45,7 +45,7 @@ type PagedHackingPrograms {
 }
 
 extend type Query {
-  hackingProgramById(hackingProgramId: ID!): HackingProgram
+  hackingProgramById(hackingProgramId: ID!): HackingProgram!
   hackingProgramsList(
     search: Search
     page: Int

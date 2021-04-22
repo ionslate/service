@@ -24,8 +24,10 @@ async function app(container: Container): Promise<Express> {
     RequestContext.create(container.entityManager, next);
   });
 
+  const typeDefs = await parseSchema();
+
   const graphqlServer = new ApolloServer({
-    typeDefs: parseSchema(),
+    typeDefs,
     resolvers,
     context: createContext(container),
     plugins: [new ApolloLoggingPlugin()],

@@ -6,11 +6,11 @@ generates:
       enumsAsTypes: true
       maybeValue: T | null
       contextType: AppContext
-      mappers:
-        Rule: '@content-manager/common/entities/RuleEntity#RuleEntity'
-        Ammo: '@content-manager/weapons/entities/AmmoEntity#AmmoEntity'
-        HackingProgram: '@content-manager/hacking/entities/HackingProgramEntity#HackingProgramEntity'
-        HackingDevice: '@content-manager/hacking/entities/HackingDeviceEntity#HackingDeviceEntity'
+      # mappers:
+      #   Rule: '@content-manager/common/entities/RuleEntity#RuleEntity'
+      #   Ammo: '@content-manager/weapons/entities/AmmoEntity#AmmoEntity'
+      #   HackingProgram: '@content-manager/hacking/entities/HackingProgramEntity#HackingProgramEntity'
+      #   HackingDevice: '@content-manager/hacking/entities/HackingDeviceEntity#HackingDeviceEntity'
     plugins:
       - add:
           content: "import { AppContext } from '@root/container';"

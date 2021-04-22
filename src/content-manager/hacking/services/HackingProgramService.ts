@@ -56,8 +56,8 @@ export class HackingProgramService {
 
   async findHackingProgramById(
     hackingProgramId: string,
-  ): Promise<HackingProgramEntity | null> {
-    return await this.hackingProgramRepository.findOne({
+  ): Promise<HackingProgramEntity> {
+    return await this.hackingProgramRepository.findOneOrFail({
       id: hackingProgramId,
     });
   }
