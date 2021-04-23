@@ -1,0 +1,3 @@
+node_modules
+dist
+__generatedTypes__.ts
