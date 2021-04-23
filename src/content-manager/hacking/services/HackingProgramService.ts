@@ -2,7 +2,7 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
 import { HackingProgramRequest, Search } from '@root/__generatedTypes__';
 import { Page, paginateEntites } from '@root/utils';
-import { QueryOrder } from '@mikro-orm/core';
+import { QueryOrder, LoadStrategy } from '@mikro-orm/core';
 
 export class HackingProgramService {
   constructor(
@@ -89,7 +89,11 @@ export class HackingProgramService {
       {
         devices: { id: { $in: hackingDeviceIds } },
       },
-      { populate: ['devices'], orderBy: { name: QueryOrder.ASC } },
+      {
+        populate: { devices: true },
+        orderBy: { name: QueryOrder.ASC },
+        strategy: LoadStrategy.JOINED,
+      },
     );
 
     return hackingDeviceIds.map((deviceId) =>
