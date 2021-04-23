@@ -10,4 +10,9 @@ export default {
   migrations: {
     path: './src/__migrations__',
   },
+  driverOptions: {
+    connection: {
+      ssl: config.isProduction ? { rejectUnauthorized: false } : undefined,
+    },
+  },
 } as Options<PostgreSqlDriver>;
