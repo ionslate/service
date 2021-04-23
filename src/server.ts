@@ -12,6 +12,7 @@ import { errorHandler } from '@error/handlers/errorHandler';
 import { Express } from 'express-serve-static-core';
 import resolvers from '@root/resolvers';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { getUser } from './security/jwtVerifier';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
@@ -22,6 +23,16 @@ async function app(container: Container): Promise<Express> {
 
   app.use((_, __, next) => {
     RequestContext.create(container.entityManager, next);
+  });
+
+  app.use(getUser);
+
+  app.use((req, res, next) => {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    return next();
   });
 
   const typeDefs = await parseSchema();
