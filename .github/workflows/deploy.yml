@@ -52,4 +52,4 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           
       - name: Deploy
-        run: doctl apps create-deployment antimateriel-service
+        run: doctl apps create-deployment ${{ secrets.APP_SERVICE_ID }}
