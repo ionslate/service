@@ -13,7 +13,8 @@
     "alwaysStrict": true,                           
     "noUncheckedIndexedAccess": true,                
     "moduleResolution": "node",                      
-    "baseUrl": "./src",                            
+    "baseUrl": "./src",       
+                         
     "paths": {                                      
       "@root/*": ["*"], 
       "@content-manager/*": ["content-manager/*"],
@@ -25,6 +26,7 @@
     "allowSyntheticDefaultImports": true,            
     "esModuleInterop": true,                       
     "skipLibCheck": true,                           
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["src/types", "./node_modules/@types"]
   }
 }

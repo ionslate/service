@@ -67,6 +67,14 @@ export async function createContainer(): Promise<Container> {
   };
 }
 
+export type UserRole = 'Admin' | 'Everone';
+
+export type User = {
+  id: string;
+  roles: UserRole[];
+  name: string;
+};
+
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
@@ -78,7 +86,8 @@ export type AppContext = {
 
 export const createContext = (
   container: Container,
-): ContextFunction<ExpressContext, AppContext> => () => ({
+): ContextFunction<ExpressContext, AppContext> => ({ req }) => ({
+  user: req.user,
   ruleService: container.ruleService,
   ammoService: container.ammoService,
   combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
