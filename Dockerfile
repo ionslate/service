@@ -3,7 +3,7 @@ ENV NODE_ENV=production
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 
-COPY ["package.json", "yarn.lock", "/opt/app/"]
+COPY ["package.json", "yarn.lock", "/opt/app]
 RUN yarn install
 
 COPY . /opt/app

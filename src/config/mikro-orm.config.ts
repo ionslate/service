@@ -8,6 +8,10 @@ export default {
   clientUrl: config.clientUrl,
   entities: ['./dist/**/entities/*'],
   entitiesTs: ['./src/**/entities/*'],
-  debug: true,
   findOneOrFailHandler,
+  driverOptions: {
+    connection: {
+      ssl: config.isProduction ? { rejectUnauthorized: false } : undefined,
+    },
+  },
 } as Options<PostgreSqlDriver>;

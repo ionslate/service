@@ -8,4 +8,5 @@ export default {
   port: process.env.PORT,
   authIssuer: process.env.AUTH_ISSUER,
   expectedAudience: process.env.EXPECTED_AUDIENCE,
+  isProduction: process.env.NODE_ENV === 'production',
 };
