@@ -12,6 +12,8 @@ const connection = {
   },
 };
 
+console.log(config.isProduction, 'is production');
+
 export default {
   type: 'postgresql',
   dbName: config.dbName,

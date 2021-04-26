@@ -15,6 +15,7 @@
     "codegen:watch": "graphql-codegen -w",
     "migration:create": "mikro-orm migration:create",
     "migration:up": "mikro-orm migration:up",
+    "migration:prod:up": "NODE_ENV=production mikro-orm migration:up",
     "test": "jest --env=jsdom -w --coverage --collectCoverageFrom=src/**/*.{ts,tsx}",
     "test:watch": "yarn test --watch",
     "test:ci": "CI=true yarn test"
