@@ -3,11 +3,17 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import config from '@root/config/config';
 import fs from 'fs';
 import path from 'path';
+import assert from 'assert';
+
+const ca = fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString();
+
+console.log('is prod', config.isProduction);
+assert(ca, new Error('Missing ca.pem file'));
 
 const connection = {
   ssl: {
     rejectUnauthorized: false,
-    ca: fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString(),
+    ca,
   },
 };
 
