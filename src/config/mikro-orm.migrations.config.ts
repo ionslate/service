@@ -26,6 +26,9 @@ export default {
   password: config.dbPassword,
   entities: ['./dist/**/entities/*'],
   entitiesTs: ['./src/**/entities/*'],
+  pool: {
+    max: 5,
+  },
   migrations: {
     path: './src/__migrations__',
     disableForeignKeys: false,
