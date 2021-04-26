@@ -28,6 +28,7 @@ export default {
   entitiesTs: ['./src/**/entities/*'],
   migrations: {
     path: './src/__migrations__',
+    disableForeignKeys: false,
   },
   driverOptions: config.isProduction ? { connection } : undefined,
 } as Options<PostgreSqlDriver>;

@@ -1,9 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export class Migration20210418180403 extends Migration {
   async up(): Promise<void> {
     this.addSql(
-      'GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO api_user',
+      `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${process.env.DB_API_USER}`,
     );
     this.addSql(
       'create table "ammo" ("id" varchar(255) not null, "name" varchar(255) not null, "link" varchar(255) null);',
