@@ -45,11 +45,55 @@ jobs:
            
       - name: Run Build
         run: yarn build      
-      
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
         with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            cbadger85/antimateriel:${{ github.sha }}
+            cbadger85/antimateriel:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+        
       - name: Deploy
-        run: doctl apps create-deployment ${{ secrets.APP_SERVICE_ID }}
+        uses: floms/action-caprover@v1
+        with:
+          host: https://captain.admin.ionslate.com
+          password: '${{ secrets.CAPROVER_PASSWORD }}'
+          app: service
+          image: cbadger85/antimateriel:${{ github.sha }}
+
+
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
