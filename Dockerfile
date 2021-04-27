@@ -1,4 +1,4 @@
-FROM node:12.18.2
+FROM node:12-alpine
 ENV NODE_ENV=production
 ENV PORT=8080
 
