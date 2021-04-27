@@ -7,7 +7,6 @@ import assert from 'assert';
 
 const ca = fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString();
 
-console.log('is prod', config.isProduction);
 assert(ca, new Error('Missing ca.pem file'));
 
 const connection = {
