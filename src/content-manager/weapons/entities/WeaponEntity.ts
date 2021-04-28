@@ -1,29 +1,26 @@
 import { BaseEntity, Collection, EntitySchema } from '@mikro-orm/core';
 import { generateId } from '@root/utils';
-import { RuleType } from '@root/__generatedTypes__';
 import { WeaponModeEntity } from '@content-manager/weapons/entities/WeaponModeEntity';
 
-export class RuleEntity extends BaseEntity<RuleEntity, 'id'> {
+export class WeaponEntity extends BaseEntity<WeaponEntity, 'id'> {
   id!: string;
   name!: string;
   link?: string | null;
-  type?: RuleType;
-  weaponModes = new Collection<WeaponModeEntity>(this);
+  modes = new Collection<WeaponModeEntity>(this);
 }
 
-export const ruleSchema = new EntitySchema({
-  class: RuleEntity,
+export const weaponSchema = new EntitySchema({
+  class: WeaponEntity,
   extends: 'BaseEntity',
-  tableName: 'rule',
+  tableName: 'weapon',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },
     name: { type: 'string', unique: true },
     link: { type: 'string', nullable: true },
-    type: { type: 'string', nullable: true },
-    weaponModes: {
-      reference: 'm:n',
+    modes: {
+      reference: '1:m',
       entity: () => WeaponModeEntity,
-      mappedBy: 'traits',
+      mappedBy: 'weapon',
       hidden: true,
     },
   },
