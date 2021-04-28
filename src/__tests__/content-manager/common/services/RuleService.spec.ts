@@ -8,6 +8,10 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { IBackup, newDb, IMemoryDb } from 'pg-mem';
 import { findOneOrFailHandler } from '@root/utils';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { weaponModeSchema } from '@content-manager/weapons/entities/WeaponModeEntity';
+import { weaponRangeSchema } from '@content-manager/weapons/entities/WeaponRangeEntity';
+import { weaponSchema } from '@content-manager/weapons/entities/WeaponEntity';
+import { ammoSchema } from '@content-manager/weapons/entities/AmmoEntity';
 
 let db: IMemoryDb;
 let orm: MikroORM;
@@ -16,13 +20,19 @@ let backup: IBackup;
 
 beforeAll(async () => {
   db = newDb();
+
   orm = await db.adapters.createMikroOrm({
-    entities: [ruleSchema],
+    entities: [
+      ammoSchema,
+      ruleSchema,
+      weaponModeSchema,
+      weaponRangeSchema,
+      weaponSchema,
+    ],
     findOneOrFailHandler,
   });
 
   await orm.getSchemaGenerator().createSchema();
-
   const ruleRepository: EntityRepository<RuleEntity> = orm.em.getRepository(
     RuleEntity,
   );

@@ -12,7 +12,7 @@ export class WeaponEntity extends BaseEntity<WeaponEntity, 'id'> {
 export const weaponSchema = new EntitySchema({
   class: WeaponEntity,
   extends: 'BaseEntity',
-  tableName: 'ammo',
+  tableName: 'weapon',
   properties: {
     id: { type: 'string', onCreate: () => generateId(), primary: true },
     name: { type: 'string', unique: true },

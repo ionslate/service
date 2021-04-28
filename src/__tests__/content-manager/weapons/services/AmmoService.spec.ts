@@ -9,6 +9,10 @@ import {
   AmmoEntity,
   ammoSchema,
 } from '@content-manager/weapons/entities/AmmoEntity';
+import { ruleSchema } from '@content-manager/common/entities/RuleEntity';
+import { weaponSchema } from '@content-manager/weapons/entities/WeaponEntity';
+import { weaponModeSchema } from '@content-manager/weapons/entities/WeaponModeEntity';
+import { weaponRangeSchema } from '@content-manager/weapons/entities/WeaponRangeEntity';
 
 let db: IMemoryDb;
 let orm: MikroORM;
@@ -18,7 +22,13 @@ let backup: IBackup;
 beforeAll(async () => {
   db = newDb();
   orm = await db.adapters.createMikroOrm({
-    entities: [ammoSchema],
+    entities: [
+      ruleSchema,
+      weaponModeSchema,
+      weaponRangeSchema,
+      weaponSchema,
+      ammoSchema,
+    ],
     findOneOrFailHandler,
   });
 

@@ -16,6 +16,16 @@ type WeaponRange {
   _96: WeaponRangeModifier
 }
 
+input WeaponRangeRequest {
+  _8: WeaponRangeModifier
+  _16: WeaponRangeModifier
+  _24: WeaponRangeModifier
+  _32: WeaponRangeModifier
+  _40: WeaponRangeModifier
+  _48: WeaponRangeModifier
+  _96: WeaponRangeModifier
+}
+
 type WeaponMode {
   id: ID!
   name: String!
@@ -29,7 +39,7 @@ type WeaponMode {
 
 input WeaponModeRequest {
   name: String!
-  range: WeaponRange!
+  range: WeaponRangeRequest!
   damage: String
   burst: String
   savingAttribute: String
