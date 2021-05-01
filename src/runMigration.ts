@@ -1,9 +1,6 @@
 import migrationConfig from '@config/mikro-orm.migrations.config';
 import { MikroORM } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 async function runMigration() {
   console.log('Running migrations...');
