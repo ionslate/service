@@ -1,41 +1,13 @@
+import migrationConfig from '@config/mikro-orm.migrations.config';
 import { MikroORM } from '@mikro-orm/core';
-import fs from 'fs';
-import path from 'path';
-import assert from 'assert';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const ca = fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString();
-
-assert(ca, new Error('Missing ca.pem file'));
-
-const connection = {
-  ssl: {
-    rejectUnauthorized: false,
-    ca,
-  },
-};
-
 async function runMigration() {
   console.log('Running migrations...');
-  const orm = await MikroORM.init<PostgreSqlDriver>({
-    type: 'postgresql',
-    dbName: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT as never,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    entities: ['./dist/**/entities/*'],
-    entitiesTs: ['./src/**/entities/*'],
-    migrations: {
-      path: './src/__migrations__',
-      disableForeignKeys: false,
-    },
-    driverOptions:
-      process.env.NODE_ENV === 'production' ? { connection } : undefined,
-  });
+  const orm = await MikroORM.init<PostgreSqlDriver>(migrationConfig);
 
   try {
     const migrator = orm.getMigrator();
