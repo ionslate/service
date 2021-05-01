@@ -50,7 +50,7 @@ export const weaponModeSchema = new EntitySchema({
     weapon: {
       reference: 'm:1',
       entity: () => WeaponEntity,
-      mapToPk: true,
+      // mapToPk: true,
     },
   },
 });

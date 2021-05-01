@@ -14,6 +14,10 @@ import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/Hack
 import Dataloader from 'dataloader';
 import { ContextFunction } from 'apollo-server-core';
 import { ExpressContext } from 'apollo-server-express';
+import { WeaponService } from '@content-manager/weapons/services/WeaponService';
+import { WeaponEntity } from '@content-manager/weapons/entities/WeaponEntity';
+import { WeaponModeEntity } from '@content-manager/weapons/entities/WeaponModeEntity';
+import { WeaponLoader } from '@content-manager/weapons/loaders/WeaponLoader';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
@@ -28,6 +32,10 @@ export type Container = {
   hackingDeviceRepository: EntityRepository<HackingDeviceEntity>;
   hackingDeviceService: HackingDeviceService;
   hackingProgramLoader: HackingProgramLoader;
+  weaponRepository: EntityRepository<WeaponEntity>;
+  weaponModeRepository: EntityRepository<WeaponModeEntity>;
+  weaponService: WeaponService;
+  weaponLoader: WeaponLoader;
 };
 
 export async function createContainer(): Promise<Container> {
@@ -51,6 +59,16 @@ export async function createContainer(): Promise<Container> {
   );
   const hackingProgramLoader = new HackingProgramLoader(hackingProgramService);
 
+  const weaponRepository = orm.em.getRepository(WeaponEntity);
+  const weaponModeRepository = orm.em.getRepository(WeaponModeEntity);
+  const weaponService = new WeaponService(
+    weaponRepository,
+    weaponModeRepository,
+    ammoRepository,
+    ruleRepository,
+  );
+  const weaponLoader = new WeaponLoader(weaponService);
+
   return {
     orm,
     entityManager: orm.em,
@@ -64,6 +82,10 @@ export async function createContainer(): Promise<Container> {
     hackingDeviceRepository,
     hackingDeviceService,
     hackingProgramLoader,
+    weaponRepository,
+    weaponModeRepository,
+    weaponService,
+    weaponLoader,
   };
 }
 
@@ -82,6 +104,10 @@ export type AppContext = {
   hackingProgramService: HackingProgramService;
   hackingDeviceService: HackingDeviceService;
   hackingProgramLoader: Dataloader<string, HackingProgramEntity[], string>;
+  weaponService: WeaponService;
+  weaponModesLoader: Dataloader<string, WeaponModeEntity[], string>;
+  ammoLoader: Dataloader<string, AmmoEntity[], string>;
+  traitsLoader: Dataloader<string, RuleEntity[], string>;
 };
 
 export const createContext = (
@@ -94,4 +120,8 @@ export const createContext = (
   hackingProgramService: container.hackingProgramService,
   hackingDeviceService: container.hackingDeviceService,
   hackingProgramLoader: container.hackingProgramLoader.createHackingProgramLoader(),
+  weaponService: container.weaponService,
+  weaponModesLoader: container.weaponLoader.createWeaponModesLoader(),
+  ammoLoader: container.weaponLoader.createAmmoLoader(),
+  traitsLoader: container.weaponLoader.createTraitsLoader(),
 });

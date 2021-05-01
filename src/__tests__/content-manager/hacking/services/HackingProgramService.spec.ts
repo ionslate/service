@@ -136,7 +136,9 @@ describe('HackingProgramService', () => {
     });
 
     it('should throw an error if the hacking program does not exist', async () => {
-      return await hackingProgramService
+      expect.assertions(2);
+
+      await hackingProgramService
         .findHackingProgramById('fake-id')
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);

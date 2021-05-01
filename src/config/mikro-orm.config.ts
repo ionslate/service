@@ -2,15 +2,6 @@ import { Options } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import config from '@root/config/config';
 import { findOneOrFailHandler } from '@root/utils';
-import fs from 'fs';
-import path from 'path';
-
-const connection = {
-  ssl: {
-    rejectUnauthorized: false,
-    ca: fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString(),
-  },
-};
 
 export default {
   type: 'postgresql',
@@ -22,6 +13,13 @@ export default {
   entities: ['./dist/**/entities/*'],
   entitiesTs: ['./src/**/entities/*'],
   findOneOrFailHandler,
-  driverOptions: config.isProduction ? { connection } : undefined,
+  driverOptions: config.isProduction
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+          ca: Buffer.from(config.dbCert as string, 'base64').toString(),
+        },
+      }
+    : undefined,
   debug: !config.isProduction,
 } as Options<PostgreSqlDriver>;

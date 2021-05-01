@@ -1,6 +1,7 @@
 import { Container } from '@root/container';
 import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/HackingProgramLoader';
 import { AmmoLoader } from '@root/content-manager/weapons/loaders/AmmoLoader';
+import { WeaponLoader } from '@content-manager/weapons/loaders/WeaponLoader';
 
 type TestContainerOptions = Partial<
   Record<keyof Container, jest.Mock | Record<string, jest.Mock>>
@@ -28,6 +29,12 @@ export function createTestContainer(options?: TestContainerOptions): Container {
     options?.hackingProgramLoader ||
     new HackingProgramLoader(hackingProgramService as never);
 
+  const weaponRepository = options?.weaponRepository || jest.fn();
+  const weaponModeRepository = options?.weaponModeRepository || jest.fn();
+  const weaponService = options?.weaponService || jest.fn();
+  const weaponLoader =
+    options?.weaponLoader || new WeaponLoader(weaponService as never);
+
   return ({
     orm,
     entityManager,
@@ -41,5 +48,9 @@ export function createTestContainer(options?: TestContainerOptions): Container {
     hackingDeviceRepository,
     hackingDeviceService,
     hackingProgramLoader,
+    weaponRepository,
+    weaponModeRepository,
+    weaponService,
+    weaponLoader,
   } as unknown) as Container;
 }

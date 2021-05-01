@@ -170,8 +170,9 @@ describe('AmmoService', () => {
       expect(foundAmmo.toObject()).toEqual(expect.objectContaining(ammo));
     });
 
-    it('should find the ammo by id', async () => {
-      ammoService.findAmmoById('fake-id').catch((e: Error) => {
+    it('should throw if no ammo is found', async () => {
+      expect.assertions(2);
+      await ammoService.findAmmoById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
         expect(e.message).toBe('Ammo not found');
       });
