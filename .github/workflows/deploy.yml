@@ -73,8 +73,8 @@ jobs:
           context: .
           push: true
           tags: |
-            cbadger85/antimateriel:${{ github.sha }}
-            cbadger85/antimateriel:latest
+            ${{ secrets.IMAGE_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.IMAGE_REPOSITORY }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -84,10 +84,10 @@ jobs:
       - name: Deploy
         uses: floms/action-caprover@v1
         with:
-          host: https://captain.admin.ionslate.com
+          host: ${{ secrets.DEPLOYMENT_URL }}
           password: '${{ secrets.CAPROVER_PASSWORD }}'
-          app: service
-          image: cbadger85/antimateriel:${{ github.sha }}
+          app: ${{ secrets.APP_NAME }}
+          image: ${{ secrets.IMAGE_REPOSITORY }}:${{ github.sha }}
 
 
         # Temp fix
