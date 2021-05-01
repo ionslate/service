@@ -183,6 +183,8 @@ describe('HackingDeviceService', () => {
         convertColToSnakeCase(hackingDevice),
       );
 
+      expect.assertions(2);
+
       await hackingDeviceService
         .findHackingDeviceById('fake-id')
         .catch((e: Error) => {

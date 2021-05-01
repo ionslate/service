@@ -19,9 +19,8 @@ type PagedWeapons {
 }
 
 extend type Query {
-  weaponById(id: ID!): Weapon
-  searchWeapons(name: String!, page: Int, limit: Int): PagedWeapons!
-  allWeapons(page: Int, limit: Int): PagedWeapons!
+  weaponById(weaponId: ID!): Weapon
+  weaponsList(search: Search, page: Int, limit: Int): PagedWeapons!
 }
 
 extend type Mutation {

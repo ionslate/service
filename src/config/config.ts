@@ -10,6 +10,7 @@ export default {
   dbPassword: process.env.DB_PASSWORD,
   dbApiUser: process.env.DB_API_USER,
   dbApiPassword: process.env.DB_API_PASSWORD,
+  dbCert: process.env.DB_CERT,
   port: process.env.PORT,
   authIssuer: process.env.AUTH_ISSUER,
   expectedAudience: process.env.EXPECTED_AUDIENCE,

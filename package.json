@@ -6,7 +6,7 @@
   "author": "Charles Badger",
   "license": "MIT",
   "scripts": {
-    "start": "yarn migration:up && node -r ./tsconfig-paths-bootstrap.js dist/index.js",
+    "start": "yarn migration:up:prod && node -r ./tsconfig-paths-bootstrap.js dist/index.js",
     "start:dev": "NODE_ENV=development nodemon src/index.ts",
     "build": "tsc",
     "lint": "eslint",
@@ -15,6 +15,7 @@
     "codegen:watch": "graphql-codegen -w",
     "migration:create": "mikro-orm migration:create",
     "migration:up": "mikro-orm migration:up",
+    "migration:up:prod": "ts-node -r tsconfig-paths/register src/runMigration",
     "test": "jest --env=jsdom -w --coverage --collectCoverageFrom=src/**/*.{ts,tsx}",
     "test:watch": "yarn test --watch",
     "test:ci": "CI=true yarn test"

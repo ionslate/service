@@ -110,7 +110,8 @@ describe('RuleService', () => {
     });
 
     it('should throw an error if the rule does not exist', async () => {
-      return await ruleService.findRuleById('fake-id').catch((e: Error) => {
+      expect.assertions(2);
+      await ruleService.findRuleById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
         expect(e.message).toBe('Rule not found');
       });

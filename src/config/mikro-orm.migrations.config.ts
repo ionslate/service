@@ -1,20 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import config from '@root/config/config';
-import fs from 'fs';
-import path from 'path';
-import assert from 'assert';
-
-const ca = fs.readFileSync(path.join(process.cwd(), 'certs/ca.pem')).toString();
-
-assert(ca, new Error('Missing ca.pem file'));
-
-const connection = {
-  ssl: {
-    rejectUnauthorized: false,
-    ca,
-  },
-};
 
 export default {
   type: 'postgresql',
@@ -25,12 +11,16 @@ export default {
   password: config.dbPassword,
   entities: ['./dist/**/entities/*'],
   entitiesTs: ['./src/**/entities/*'],
-  pool: {
-    max: 5,
-  },
   migrations: {
     path: './src/__migrations__',
     disableForeignKeys: false,
   },
-  driverOptions: config.isProduction ? { connection } : undefined,
+  driverOptions: config.isProduction
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+          ca: Buffer.from(config.dbCert as string, 'base64').toString(),
+        },
+      }
+    : undefined,
 } as Options<PostgreSqlDriver>;
