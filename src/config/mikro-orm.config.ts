@@ -15,9 +15,11 @@ export default {
   findOneOrFailHandler,
   driverOptions: config.isProduction
     ? {
-        ssl: {
-          rejectUnauthorized: false,
-          ca: Buffer.from(config.dbCert as string, 'base64').toString(),
+        connection: {
+          ssl: {
+            rejectUnauthorized: false,
+            ca: Buffer.from(config.dbCert as string, 'base64').toString(),
+          },
         },
       }
     : undefined,
