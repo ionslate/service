@@ -9,6 +9,6 @@ export function formatApolloError(e: GraphQLError): GraphQLFormattedError {
   return {
     message: e.message,
     path: e.path,
-    extensions: { code: e.extensions?.code },
+    extensions: { code: e.extensions?.exception.status || 500 },
   };
 }

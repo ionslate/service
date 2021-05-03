@@ -20,11 +20,11 @@ input AmmoRequest {
 }
 
 extend type Query {
-  ammoById(ammoId: ID!): Ammo!
-  ammoList(search: Search, page: Int, limit: Int): PagedAmmo!
+  ammoById(ammoId: ID!): Ammo! @auth(requires: CONTENT_MANAGER)
+  ammoList(search: Search, page: Int, limit: Int): PagedAmmo! @auth(requires: CONTENT_MANAGER)
 }
 
 extend type Mutation {
-  createAmmo(request: AmmoRequest!): Ammo!
-  updateAmmo(ammoId: ID!, request: AmmoRequest!): Ammo!
+  createAmmo(request: AmmoRequest!): Ammo! @auth(requires: CONTENT_MANAGER)
+  updateAmmo(ammoId: ID!, request: AmmoRequest!): Ammo! @auth(requires: CONTENT_MANAGER)
 }

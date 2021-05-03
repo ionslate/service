@@ -21,18 +21,18 @@ input HackingDeviceRequest {
 }
 
 extend type Query {
-  hackingDeviceById(hackingDeviceId: ID!): HackingDevice!
+  hackingDeviceById(hackingDeviceId: ID!): HackingDevice! @auth(requires: CONTENT_MANAGER)
   hackingDevicesList(
     search: Search
     page: Int
     limit: Int
-  ): PagedHackingDevices!
+  ): PagedHackingDevices! @auth(requires: CONTENT_MANAGER)
 }
 
 extend type Mutation {
-  createHackingDevice(request: HackingDeviceRequest!): HackingDevice!
+  createHackingDevice(request: HackingDeviceRequest!): HackingDevice! @auth(requires: CONTENT_MANAGER)
   updateHackingDevice(
     hackingDeviceId: ID!
     request: HackingDeviceRequest!
-  ): HackingDevice!
+  ): HackingDevice! @auth(requires: CONTENT_MANAGER)
 }

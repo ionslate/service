@@ -1,18 +1,18 @@
+import { AuthDirective } from '@auth/directives/AuthDirective';
+import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
+import { errorHandler } from '@error/handlers/errorHandler';
+import { formatApolloError } from '@error/handlers/formatApolloError';
+import LoggerStream from '@logger/LoggerStream';
 import { RequestContext } from '@mikro-orm/core';
+import { Container, createContext } from '@root/container';
+import ApolloLoggingPlugin from '@root/logger/ApolloLoggingPlugin';
+import resolvers from '@root/resolvers';
+import { parseSchema } from '@root/utils';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
-import morgan from 'morgan';
-import { Container } from '@root/container';
-import ApolloLoggingPlugin from '@root/logger/ApolloLoggingPlugin';
-import LoggerStream from '@logger/LoggerStream';
-import { parseSchema } from '@root/utils';
-import { createContext } from '@root/container';
-import { formatApolloError } from '@error/handlers/formatApolloError';
-import { errorHandler } from '@error/handlers/errorHandler';
 import { Express } from 'express-serve-static-core';
-import resolvers from '@root/resolvers';
-import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
 import session, { SessionOptions } from 'express-session';
+import morgan from 'morgan';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
@@ -49,14 +49,6 @@ async function app(container: Container): Promise<Express> {
     return next();
   });
 
-  // app.use((req, res, next) => {
-  //   if (!req.session.user) {
-  //     return res.sendStatus(401);
-  //   }
-
-  //   return next();
-  // });
-
   const typeDefs = await parseSchema();
 
   const graphqlServer = new ApolloServer({
@@ -65,6 +57,9 @@ async function app(container: Container): Promise<Express> {
     context: createContext(container),
     plugins: [new ApolloLoggingPlugin()],
     formatError: formatApolloError,
+    schemaDirectives: {
+      auth: AuthDirective,
+    },
   });
 
   graphqlServer.applyMiddleware({ app });

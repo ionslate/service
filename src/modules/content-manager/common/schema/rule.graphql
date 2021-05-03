@@ -32,11 +32,11 @@ input RuleRequest {
 }
 
 extend type Query {
-  ruleById(ruleId: ID!): Rule!
-  rulesList(search: Search, page: Int, limit: Int): PagedRules!
+  ruleById(ruleId: ID!): Rule! @auth(requires: CONTENT_MANAGER)
+  rulesList(search: Search, page: Int, limit: Int): PagedRules! @auth(requires: CONTENT_MANAGER)
 }
 
 extend type Mutation {
-  createRule(request: RuleRequest!): Rule!
-  updateRule(ruleId: ID!, request: RuleRequest!): Rule!
+  createRule(request: RuleRequest!): Rule! @auth(requires: CONTENT_MANAGER)
+  updateRule(ruleId: ID!, request: RuleRequest!): Rule! @auth(requires: CONTENT_MANAGER)
 }

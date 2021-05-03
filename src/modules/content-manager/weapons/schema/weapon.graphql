@@ -19,11 +19,11 @@ type PagedWeapons {
 }
 
 extend type Query {
-  weaponById(weaponId: ID!): Weapon
-  weaponsList(search: Search, page: Int, limit: Int): PagedWeapons!
+  weaponById(weaponId: ID!): Weapon! @auth(requires: CONTENT_MANAGER)
+  weaponsList(search: Search, page: Int, limit: Int): PagedWeapons! @auth(requires: CONTENT_MANAGER)
 }
 
 extend type Mutation {
-  createWeapon(request: WeaponRequest!): Weapon!
-  updateWeapon(weaponId: ID!, request: WeaponRequest!): Weapon!
+  createWeapon(request: WeaponRequest!): Weapon! @auth(requires: CONTENT_MANAGER)
+  updateWeapon(weaponId: ID!, request: WeaponRequest!): Weapon! @auth(requires: CONTENT_MANAGER)
 }
