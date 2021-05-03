@@ -3,6 +3,7 @@ import { LoginRequest } from '@root/__generatedTypes__';
 import { UserEntity } from '@users/entities/UserEntity';
 import bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
+import { NotAuthorized } from '@error/exceptions/NotAuthorized';
 
 const ONE_HOUR = 3600000;
 
@@ -16,13 +17,13 @@ export class AuthService {
     });
 
     if (!userEntity || !userEntity.password) {
-      throw new Error('NOT AUTHORIZED');
+      throw new NotAuthorized();
     }
 
     const isValid = await bcrypt.compare(request.password, userEntity.password);
 
     if (!isValid) {
-      throw new Error('NOT AUTHORIZED');
+      throw new NotAuthorized();
     }
 
     return userEntity;
@@ -62,7 +63,7 @@ export class AuthService {
     });
 
     if (!userEntity) {
-      throw new Error('NOT AUTHORIZED');
+      throw new NotAuthorized();
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

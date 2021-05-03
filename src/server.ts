@@ -41,14 +41,6 @@ async function app(container: Container): Promise<Express> {
     RequestContext.create(container.entityManager, next);
   });
 
-  app.use((req, res, next) => {
-    container.sessionStore.all?.((err, sessions) => {
-      console.log(JSON.stringify(sessions, undefined, 2));
-    });
-
-    return next();
-  });
-
   const typeDefs = await parseSchema();
 
   const graphqlServer = new ApolloServer({

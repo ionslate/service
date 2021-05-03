@@ -10,6 +10,7 @@ import { UserEntity } from '@users/entities/UserEntity';
 import bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 import { RedisStore } from 'connect-redis';
+import { Forbidden } from '@error/exceptions/Forbidden';
 
 const ONE_HOUR = 3600000;
 
@@ -146,7 +147,7 @@ export class UserService {
     });
 
     if (!userEntity.password) {
-      throw new Error('FORBIDDEN');
+      throw new Forbidden();
     }
 
     const isValid = await bcrypt.compare(
@@ -155,7 +156,7 @@ export class UserService {
     );
 
     if (!isValid) {
-      throw new Error('FORBIDDEN');
+      throw new Forbidden();
     }
 
     const password = await bcrypt.hash(request.newPassword, 10);

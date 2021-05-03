@@ -53,6 +53,6 @@ extend type Mutation {
     weaponId: ID!
     weaponModeId: ID!
     request: WeaponModeRequest!
-  ): WeaponMode!
+  ): WeaponMode! @auth(requires: CONTENT_MANAGER)
   removeWeaponMode(weaponId: ID!, weaponModeId: ID!): ID @auth(requires: CONTENT_MANAGER)
 }
