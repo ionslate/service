@@ -12,10 +12,26 @@ import { errorHandler } from '@error/handlers/errorHandler';
 import { Express } from 'express-serve-static-core';
 import resolvers from '@root/resolvers';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
-import { getUser } from './security/jwtVerifier';
+import session, { SessionOptions } from 'express-session';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
+
+  const sess: SessionOptions = {
+    secret: 'keyboard cat',
+    name: 'user_sid',
+    cookie: {},
+    saveUninitialized: false,
+    resave: false,
+    store: container.sessionStore,
+  };
+
+  if (app.get('env') === 'production' && sess.cookie) {
+    app.set('trust proxy', 1); // trust first proxy
+    sess.cookie.secure = true; // serve secure cookies
+  }
+
+  app.use(session(sess));
 
   app.use(morgan('short', { stream: new LoggerStream() }));
 
@@ -25,15 +41,21 @@ async function app(container: Container): Promise<Express> {
     RequestContext.create(container.entityManager, next);
   });
 
-  app.use(getUser);
-
   app.use((req, res, next) => {
-    if (!req.user) {
-      return res.sendStatus(401);
-    }
+    container.sessionStore.all?.((err, sessions) => {
+      console.log(JSON.stringify(sessions, undefined, 2));
+    });
 
     return next();
   });
+
+  // app.use((req, res, next) => {
+  //   if (!req.session.user) {
+  //     return res.sendStatus(401);
+  //   }
+
+  //   return next();
+  // });
 
   const typeDefs = await parseSchema();
 

@@ -1,7 +1,7 @@
-import { Container } from '@root/container';
-import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/HackingProgramLoader';
-import { AmmoLoader } from '@root/content-manager/weapons/loaders/AmmoLoader';
+import { HackingProgramLoader } from '@content-manager/hacking/loaders/HackingProgramLoader';
+import { AmmoLoader } from '@content-manager/weapons/loaders/AmmoLoader';
 import { WeaponLoader } from '@content-manager/weapons/loaders/WeaponLoader';
+import { Container } from '@root/container';
 
 type TestContainerOptions = Partial<
   Record<keyof Container, jest.Mock | Record<string, jest.Mock>>

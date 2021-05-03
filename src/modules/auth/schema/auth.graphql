@@ -1,0 +1,21 @@
+enum UserRole {
+  USER
+  USER_ADMIN
+  CONTENT_ADMIN
+}
+
+directive @auth(
+  requires: UserRole = USER,
+) on FIELD_DEFINITION
+
+input LoginRequest {
+  username: String!
+  password: String!
+}
+
+extend type Mutation {
+  resetPasswordRequest(email: String!): Boolean
+  resetPassword(resetId: String!, password: String!): Boolean
+  login(request: LoginRequest!): User!
+  logout: Boolean
+}

@@ -17,7 +17,9 @@
                          
     "paths": {                                      
       "@root/*": ["*"], 
-      "@content-manager/*": ["content-manager/*"],
+      "@content-manager/*": ["modules/content-manager/*"],
+      "@users/*": ["modules/users/*"],
+      "@auth/*": ["modules/auth/*"],
       "@config/*": ["config/*"],
       "@error/*": ["error/*"],
       "@logger/*": ["logger/*"],

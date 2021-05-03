@@ -1,26 +1,35 @@
-import { EntityManager, MikroORM } from '@mikro-orm/core';
-import { EntityRepository, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { AuthService } from '@auth/services/AuthService';
+import dbConfig from '@config/mikro-orm.config';
 import { RuleEntity } from '@content-manager/common/entities/RuleEntity';
 import { RuleService } from '@content-manager/common/services/RuleService';
-import dbConfig from '@config/mikro-orm.config';
-import { AmmoEntity } from '@root/content-manager/weapons/entities/AmmoEntity';
-import { AmmoService } from '@root/content-manager/weapons/services/AmmoService';
-import { AmmoLoader } from '@root/content-manager/weapons/loaders/AmmoLoader';
-import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
 import { HackingDeviceEntity } from '@content-manager/hacking/entities/HackingDeviceEntity';
-import { HackingProgramService } from '@content-manager/hacking/services/HackingProgramService';
+import { HackingProgramEntity } from '@content-manager/hacking/entities/HackingProgramEntity';
+import { HackingProgramLoader } from '@content-manager/hacking/loaders/HackingProgramLoader';
 import { HackingDeviceService } from '@content-manager/hacking/services/HackingDeviceService';
-import { HackingProgramLoader } from '@root/content-manager/hacking/loaders/HackingProgramLoader';
-import Dataloader from 'dataloader';
-import { ContextFunction } from 'apollo-server-core';
-import { ExpressContext } from 'apollo-server-express';
-import { WeaponService } from '@content-manager/weapons/services/WeaponService';
+import { HackingProgramService } from '@content-manager/hacking/services/HackingProgramService';
+import { AmmoEntity } from '@content-manager/weapons/entities/AmmoEntity';
 import { WeaponEntity } from '@content-manager/weapons/entities/WeaponEntity';
 import { WeaponModeEntity } from '@content-manager/weapons/entities/WeaponModeEntity';
+import { AmmoLoader } from '@content-manager/weapons/loaders/AmmoLoader';
 import { WeaponLoader } from '@content-manager/weapons/loaders/WeaponLoader';
+import { AmmoService } from '@content-manager/weapons/services/AmmoService';
+import { WeaponService } from '@content-manager/weapons/services/WeaponService';
+import { EntityManager, MikroORM } from '@mikro-orm/core';
+import { EntityRepository, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { UserEntity } from '@users/entities/UserEntity';
+import { UserService } from '@users/services/UserService';
+import { ContextFunction } from 'apollo-server-core';
+import { ExpressContext } from 'apollo-server-express';
+import connectRedis, { RedisStore } from 'connect-redis';
+import Dataloader from 'dataloader';
+import { Request, Response } from 'express-serve-static-core';
+import session from 'express-session';
+import RedisClient, { Redis } from 'ioredis';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
+  redisClient: Redis;
+  sessionStore: RedisStore;
   entityManager: EntityManager<PostgreSqlDriver>;
   ruleRepository: EntityRepository<RuleEntity>;
   ruleService: RuleService;
@@ -36,10 +45,17 @@ export type Container = {
   weaponModeRepository: EntityRepository<WeaponModeEntity>;
   weaponService: WeaponService;
   weaponLoader: WeaponLoader;
+  userRepository: EntityRepository<UserEntity>;
+  authService: AuthService;
+  userService: UserService;
 };
 
 export async function createContainer(): Promise<Container> {
   const orm = await MikroORM.init(dbConfig);
+
+  const redisClient = new RedisClient();
+  const RedisStore = connectRedis(session);
+  const sessionStore = new RedisStore({ client: redisClient });
 
   const ruleRepository = orm.em.getRepository(RuleEntity);
   const ruleService = new RuleService(ruleRepository);
@@ -69,8 +85,14 @@ export async function createContainer(): Promise<Container> {
   );
   const weaponLoader = new WeaponLoader(weaponService);
 
+  const userRepository = orm.em.getRepository(UserEntity);
+  const userService = new UserService(userRepository, sessionStore);
+  const authService = new AuthService(userRepository);
+
   return {
     orm,
+    redisClient,
+    sessionStore,
     entityManager: orm.em,
     ruleRepository,
     ruleService,
@@ -86,16 +108,11 @@ export async function createContainer(): Promise<Container> {
     weaponModeRepository,
     weaponService,
     weaponLoader,
+    userRepository,
+    userService,
+    authService,
   };
 }
-
-export type UserRole = 'Admin' | 'Everone';
-
-export type User = {
-  id: string;
-  roles: UserRole[];
-  name: string;
-};
 
 export type AppContext = {
   ruleService: RuleService;
@@ -108,12 +125,17 @@ export type AppContext = {
   weaponModesLoader: Dataloader<string, WeaponModeEntity[], string>;
   ammoLoader: Dataloader<string, AmmoEntity[], string>;
   traitsLoader: Dataloader<string, RuleEntity[], string>;
+  userService: UserService;
+  authService: AuthService;
+  req: Request;
+  res: Response;
 };
 
 export const createContext = (
   container: Container,
-): ContextFunction<ExpressContext, AppContext> => ({ req }) => ({
-  user: req.user,
+): ContextFunction<ExpressContext, AppContext> => ({ req, res }) => ({
+  req,
+  res,
   ruleService: container.ruleService,
   ammoService: container.ammoService,
   combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
@@ -124,4 +146,6 @@ export const createContext = (
   weaponModesLoader: container.weaponLoader.createWeaponModesLoader(),
   ammoLoader: container.weaponLoader.createAmmoLoader(),
   traitsLoader: container.weaponLoader.createTraitsLoader(),
+  userService: container.userService,
+  authService: container.authService,
 });
