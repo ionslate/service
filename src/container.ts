@@ -53,6 +53,7 @@ export type Container = {
 export async function createContainer(): Promise<Container> {
   const orm = await MikroORM.init(dbConfig);
 
+  // client = redis.createClient(6379, 'srv-captain--redis' , {password: 'redisonetwothree'})
   const redisClient = new RedisClient();
   const RedisStore = connectRedis(session);
   const sessionStore = new RedisStore({ client: redisClient });

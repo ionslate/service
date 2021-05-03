@@ -48,11 +48,11 @@ input WeaponModeRequest {
 }
 
 extend type Mutation {
-  createWeaponMode(weaponId: ID!, request: WeaponModeRequest!): WeaponMode!
+  createWeaponMode(weaponId: ID!, request: WeaponModeRequest!): WeaponMode! @auth(requires: CONTENT_MANAGER)
   updateWeaponMode(
     weaponId: ID!
     weaponModeId: ID!
     request: WeaponModeRequest!
-  ): WeaponMode!
-  removeWeaponMode(weaponId: ID!, weaponModeId: ID!): ID
+  ): WeaponMode! @auth(requires: CONTENT_MANAGER)
+  removeWeaponMode(weaponId: ID!, weaponModeId: ID!): ID @auth(requires: CONTENT_MANAGER)
 }

@@ -1,7 +1,8 @@
 enum UserRole {
   USER
   USER_ADMIN
-  CONTENT_ADMIN
+  CONTENT_MANAGER
+  CONTENT_PUBLISHER
 }
 
 directive @auth(

@@ -13,6 +13,7 @@ import { Express } from 'express-serve-static-core';
 import resolvers from '@root/resolvers';
 import { ResourceNotFound } from '@error/exceptions/ResourceNotFound';
 import session, { SessionOptions } from 'express-session';
+import { AuthDirective } from '@auth/directives/AuthDirective';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
@@ -41,22 +42,6 @@ async function app(container: Container): Promise<Express> {
     RequestContext.create(container.entityManager, next);
   });
 
-  app.use((req, res, next) => {
-    container.sessionStore.all?.((err, sessions) => {
-      console.log(JSON.stringify(sessions, undefined, 2));
-    });
-
-    return next();
-  });
-
-  // app.use((req, res, next) => {
-  //   if (!req.session.user) {
-  //     return res.sendStatus(401);
-  //   }
-
-  //   return next();
-  // });
-
   const typeDefs = await parseSchema();
 
   const graphqlServer = new ApolloServer({
@@ -65,6 +50,9 @@ async function app(container: Container): Promise<Express> {
     context: createContext(container),
     plugins: [new ApolloLoggingPlugin()],
     formatError: formatApolloError,
+    schemaDirectives: {
+      auth: AuthDirective,
+    },
   });
 
   graphqlServer.applyMiddleware({ app });

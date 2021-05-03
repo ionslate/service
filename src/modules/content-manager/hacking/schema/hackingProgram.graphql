@@ -45,18 +45,18 @@ type PagedHackingPrograms {
 }
 
 extend type Query {
-  hackingProgramById(hackingProgramId: ID!): HackingProgram!
+  hackingProgramById(hackingProgramId: ID!): HackingProgram! @auth(requires: CONTENT_MANAGER)
   hackingProgramsList(
     search: Search
     page: Int
     limit: Int
-  ): PagedHackingPrograms!
+  ): PagedHackingPrograms! @auth(requires: CONTENT_MANAGER)
 }
 
 extend type Mutation {
-  createHackingProgram(request: HackingProgramRequest!): HackingProgram!
+  createHackingProgram(request: HackingProgramRequest!): HackingProgram! @auth(requires: CONTENT_MANAGER)
   updateHackingProgram(
     hackingProgramId: ID!
     request: HackingProgramRequest!
-  ): HackingProgram!
+  ): HackingProgram! @auth(requires: CONTENT_MANAGER)
 }
