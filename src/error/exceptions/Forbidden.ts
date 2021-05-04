@@ -1,5 +1,5 @@
 export class Forbidden extends Error {
-  status = 404;
+  status = 403;
 
   constructor(message?: string) {
     super('Forbidden' + (message ? ` - ${message}` : ''));

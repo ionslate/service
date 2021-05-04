@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
 import httpRequest from 'supertest';
 import { createTestContainer } from '@test-utils/createTestContainer';
+import { createTestServerWithCredentials } from '@test-utils/createTestServerWithCredentials';
 
 describe('ammoResolver', () => {
   describe('Query.ammoById', () => {
@@ -23,9 +24,11 @@ describe('ammoResolver', () => {
         ],
       ]);
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ammoService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ammoService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -49,6 +52,62 @@ describe('ammoResolver', () => {
       expect(ammoService.findAmmoById).toBeCalledWith(ammoId);
       expect(ammoService.getCombinedAmmoByAmmoIds).toBeCalledWith([ammoId]);
     });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const ammoId = '1234';
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($ammoId: ID!) {
+                ammoById(ammoId: $ammoId) {
+                  id
+                  name
+                  combinedAmmo {
+                    id
+                    name
+                  }
+                }
+              }
+            `),
+            variables: { ammoId },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const ammoId = '1234';
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($ammoId: ID!) {
+              ammoById(ammoId: $ammoId) {
+                id
+                name
+                combinedAmmo {
+                  id
+                  name
+                }
+              }
+            }
+          `),
+          variables: { ammoId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Query.ammoList', () => {
@@ -68,9 +127,13 @@ describe('ammoResolver', () => {
           content: [{ id: '1', name: 'AP' }],
         });
 
-        const response = await httpRequest(
-          await server(createTestContainer({ ammoService })),
-        )
+        const testServer = await createTestServerWithCredentials(
+          await server(
+            createTestContainer({ ammoService }, ['CONTENT_MANAGER']),
+          ),
+        );
+
+        const response = await testServer
           .post('/graphql')
           .send({
             query: print(gql`
@@ -99,6 +162,61 @@ describe('ammoResolver', () => {
         );
       },
     );
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($search: Search, $page: Int, $limit: Int) {
+                ammoList(search: $search, page: $page, limit: $limit) {
+                  limit
+                  count
+                  page
+                  last
+                  content {
+                    id
+                  }
+                }
+              }
+            `),
+            variables: { search: null, page: null, limit: null },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($search: Search, $page: Int, $limit: Int) {
+              ammoList(search: $search, page: $page, limit: $limit) {
+                limit
+                count
+                page
+                last
+                content {
+                  id
+                }
+              }
+            }
+          `),
+          variables: { search: null, page: null, limit: null },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Mutation.createAmmo', () => {
@@ -111,9 +229,11 @@ describe('ammoResolver', () => {
 
       const request = { name: 'AP', combinedAmmoIds: [] };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ammoService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ammoService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -132,6 +252,55 @@ describe('ammoResolver', () => {
 
       expect(ammoService.createAmmo).toBeCalledWith(request);
     });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const request = { name: 'AP', combinedAmmoIds: [] };
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              mutation($request: AmmoRequest!) {
+                createAmmo(request: $request) {
+                  id
+                  name
+                }
+              }
+            `),
+            variables: { request },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const request = { name: 'AP', combinedAmmoIds: [] };
+
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($request: AmmoRequest!) {
+              createAmmo(request: $request) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Mutation.updateAmmo', () => {
@@ -145,9 +314,11 @@ describe('ammoResolver', () => {
 
       const request = { name: 'AP', combinedAmmoIds: [] };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ammoService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ammoService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -166,5 +337,56 @@ describe('ammoResolver', () => {
 
       expect(ammoService.updateAmmo).toBeCalledWith(ammoId, request);
     });
+  });
+
+  it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+    'should deny access if the user has a role of %s',
+    async (role) => {
+      const ammoId = '1234';
+      const request = { name: 'AP', combinedAmmoIds: [] };
+
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer(undefined, [role as never])),
+      );
+
+      const response = await testServer
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($ammoId: ID!, $request: AmmoRequest!) {
+              updateAmmo(ammoId: $ammoId, request: $request) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request, ammoId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+    },
+  );
+
+  it('should deny access if a user is not logged in', async () => {
+    const ammoId = '1234';
+    const request = { name: 'AP', combinedAmmoIds: [] };
+
+    const response = await httpRequest(await server(createTestContainer()))
+      .post('/graphql')
+      .send({
+        query: print(gql`
+          mutation($ammoId: ID!, $request: AmmoRequest!) {
+            updateAmmo(ammoId: $ammoId, request: $request) {
+              id
+              name
+            }
+          }
+        `),
+        variables: { request, ammoId },
+      })
+      .expect(200);
+
+    expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
   });
 });

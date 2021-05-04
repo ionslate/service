@@ -1,8 +1,9 @@
 import server from '@root/server';
 import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
-import httpRequest from 'supertest';
 import { createTestContainer } from '@test-utils/createTestContainer';
+import { createTestServerWithCredentials } from '@test-utils/createTestServerWithCredentials';
+import httpRequest from 'supertest';
 
 describe('hackingDeviceResolver', () => {
   describe('Query.hackingDeviceById', () => {
@@ -33,11 +34,19 @@ describe('hackingDeviceResolver', () => {
         ],
       );
 
-      const response = await httpRequest(
+      const testServer = await createTestServerWithCredentials(
         await server(
-          createTestContainer({ hackingDeviceService, hackingProgramService }),
+          createTestContainer(
+            {
+              hackingDeviceService,
+              hackingProgramService,
+            },
+            ['CONTENT_MANAGER'],
+          ),
         ),
-      )
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -63,6 +72,60 @@ describe('hackingDeviceResolver', () => {
         hackingProgramService.getHackingProgramsByHackingDeviceIds,
       ).toBeCalledWith([hackingDeviceId]);
     });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const hackingDeviceId = '1234';
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($hackingDeviceId: ID!) {
+                hackingDeviceById(hackingDeviceId: $hackingDeviceId) {
+                  id
+                  programs {
+                    id
+                  }
+                }
+              }
+            `),
+            variables: { hackingDeviceId },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const hackingDeviceId = '1234';
+
+      const response = await httpRequest(
+        await server(createTestContainer(undefined, [])),
+      )
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($hackingDeviceId: ID!) {
+              hackingDeviceById(hackingDeviceId: $hackingDeviceId) {
+                id
+                programs {
+                  id
+                }
+              }
+            }
+          `),
+          variables: { hackingDeviceId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Query.hackingDeviceList', () => {
@@ -87,9 +150,13 @@ describe('hackingDeviceResolver', () => {
           ],
         });
 
-        const response = await httpRequest(
-          await server(createTestContainer({ hackingDeviceService })),
-        )
+        const testServer = await createTestServerWithCredentials(
+          await server(
+            createTestContainer({ hackingDeviceService }, ['CONTENT_MANAGER']),
+          ),
+        );
+
+        const response = await testServer
           .post('/graphql')
           .send({
             query: print(gql`
@@ -122,6 +189,67 @@ describe('hackingDeviceResolver', () => {
         );
       },
     );
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if a user has a role of %s',
+      async (role) => {
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($search: Search, $page: Int, $limit: Int) {
+                hackingDevicesList(
+                  search: $search
+                  page: $page
+                  limit: $limit
+                ) {
+                  limit
+                  count
+                  page
+                  last
+                  content {
+                    id
+                  }
+                }
+              }
+            `),
+            variables: { search: null, page: null, limit: null },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const response = await httpRequest(
+        await server(createTestContainer(undefined, [])),
+      )
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($search: Search, $page: Int, $limit: Int) {
+              hackingDevicesList(search: $search, page: $page, limit: $limit) {
+                limit
+                count
+                page
+                last
+                content {
+                  id
+                }
+              }
+            }
+          `),
+          variables: { search: null, page: null, limit: null },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Mutation.createHackingDevice', () => {
@@ -137,9 +265,13 @@ describe('hackingDeviceResolver', () => {
         programIds: ['2345', '3456'],
       };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ hackingDeviceService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(
+          createTestContainer({ hackingDeviceService }, ['CONTENT_MANAGER']),
+        ),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -158,6 +290,63 @@ describe('hackingDeviceResolver', () => {
 
       expect(hackingDeviceService.createHackingDevice).toBeCalledWith(request);
     });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if a user has a role of %s',
+      async (role) => {
+        const request = {
+          name: 'Carbonite',
+          programIds: ['2345', '3456'],
+        };
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              mutation($request: HackingDeviceRequest!) {
+                createHackingDevice(request: $request) {
+                  id
+                  name
+                }
+              }
+            `),
+            variables: { request },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const request = {
+        name: 'Carbonite',
+        programIds: ['2345', '3456'],
+      };
+
+      const response = await httpRequest(
+        await server(createTestContainer(undefined, [])),
+      )
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($request: HackingDeviceRequest!) {
+              createHackingDevice(request: $request) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Mutation.updateHackingDevice', () => {
@@ -174,9 +363,13 @@ describe('hackingDeviceResolver', () => {
         programIds: ['2345', '3456'],
       };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ hackingDeviceService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(
+          createTestContainer({ hackingDeviceService }, ['CONTENT_MANAGER']),
+        ),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -200,6 +393,71 @@ describe('hackingDeviceResolver', () => {
         hackingDeviceId,
         request,
       );
+    });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if a user has a role of %s',
+      async (role) => {
+        const hackingDeviceId = '1234';
+        const request = {
+          name: 'Carbonite',
+          programIds: ['2345', '3456'],
+        };
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              mutation($hackingDeviceId: ID!, $request: HackingDeviceRequest!) {
+                updateHackingDevice(
+                  hackingDeviceId: $hackingDeviceId
+                  request: $request
+                ) {
+                  id
+                  name
+                }
+              }
+            `),
+            variables: { request, hackingDeviceId },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const hackingDeviceId = '1234';
+      const request = {
+        name: 'Carbonite',
+        programIds: ['2345', '3456'],
+      };
+
+      const response = await httpRequest(
+        await server(createTestContainer(undefined, [])),
+      )
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($hackingDeviceId: ID!, $request: HackingDeviceRequest!) {
+              updateHackingDevice(
+                hackingDeviceId: $hackingDeviceId
+                request: $request
+              ) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request, hackingDeviceId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
     });
   });
 });

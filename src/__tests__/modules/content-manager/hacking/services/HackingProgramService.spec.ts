@@ -142,7 +142,9 @@ describe('HackingProgramService', () => {
         .findHackingProgramById('fake-id')
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
-          expect(e.message).toBe('HackingProgram not found');
+          expect(e.message).toBe(
+            'Resource Not Found - HackingProgram not found',
+          );
         });
     });
   });

@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
 import httpRequest from 'supertest';
 import { createTestContainer } from '@test-utils/createTestContainer';
+import { createTestServerWithCredentials } from '@test-utils/createTestServerWithCredentials';
 
 describe('ruleResolver', () => {
   describe('Query.ruleById', () => {
@@ -15,9 +16,11 @@ describe('ruleResolver', () => {
         type: 'MOTORCYLE',
       });
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ruleService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ruleService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -35,6 +38,54 @@ describe('ruleResolver', () => {
       expect(JSON.parse(response.text).errors).toBeFalsy();
 
       expect(ruleService.findRuleById).toBeCalledWith(ruleId);
+    });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const ruleId = '1234';
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($ruleId: ID!) {
+                ruleById(ruleId: $ruleId) {
+                  id
+                  name
+                }
+              }
+            `),
+            variables: { ruleId },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const ruleId = '1234';
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($ruleId: ID!) {
+              ruleById(ruleId: $ruleId) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { ruleId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
     });
   });
 
@@ -55,9 +106,13 @@ describe('ruleResolver', () => {
           content: [{ id: '1234', name: 'Motorcyle', type: 'MOTORCYLE' }],
         });
 
-        const response = await httpRequest(
-          await server(createTestContainer({ ruleService })),
-        )
+        const testServer = await createTestServerWithCredentials(
+          await server(
+            createTestContainer({ ruleService }, ['CONTENT_MANAGER']),
+          ),
+        );
+
+        const response = await testServer
           .post('/graphql')
           .send({
             query: print(gql`
@@ -87,6 +142,63 @@ describe('ruleResolver', () => {
         );
       },
     );
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              query($search: Search, $page: Int, $limit: Int) {
+                rulesList(search: $search, page: $page, limit: $limit) {
+                  limit
+                  count
+                  page
+                  last
+                  content {
+                    id
+                    name
+                  }
+                }
+              }
+            `),
+            variables: { search: null, page: null, limit: null },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            query($search: Search, $page: Int, $limit: Int) {
+              rulesList(search: $search, page: $page, limit: $limit) {
+                limit
+                count
+                page
+                last
+                content {
+                  id
+                  name
+                }
+              }
+            }
+          `),
+          variables: { search: null, page: null, limit: null },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
+    });
   });
 
   describe('Mutation.createRule', () => {
@@ -104,9 +216,11 @@ describe('ruleResolver', () => {
         type: 'MOTORCYCLE',
       };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ruleService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ruleService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -124,6 +238,63 @@ describe('ruleResolver', () => {
       expect(JSON.parse(response.text).errors).toBeFalsy();
 
       expect(ruleService.createRule).toBeCalledWith(request);
+    });
+
+    it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+      'should deny access if the user has a role of %s',
+      async (role) => {
+        const request = {
+          name: 'Motorcycle',
+          link: null,
+          type: 'MOTORCYCLE',
+        };
+
+        const testServer = await createTestServerWithCredentials(
+          await server(createTestContainer(undefined, [role as never])),
+        );
+
+        const response = await testServer
+          .post('/graphql')
+          .send({
+            query: print(gql`
+              mutation($request: RuleRequest!) {
+                createRule(request: $request) {
+                  id
+                  name
+                }
+              }
+            `),
+            variables: { request },
+          })
+          .expect(200);
+
+        expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+      },
+    );
+
+    it('should deny access if a user is not logged in', async () => {
+      const request = {
+        name: 'Motorcycle',
+        link: null,
+        type: 'MOTORCYCLE',
+      };
+
+      const response = await httpRequest(await server(createTestContainer()))
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($request: RuleRequest!) {
+              createRule(request: $request) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
     });
   });
 
@@ -143,9 +314,11 @@ describe('ruleResolver', () => {
         type: 'MOTORCYCLE',
       };
 
-      const response = await httpRequest(
-        await server(createTestContainer({ ruleService })),
-      )
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer({ ruleService }, ['CONTENT_MANAGER'])),
+      );
+
+      const response = await testServer
         .post('/graphql')
         .send({
           query: print(gql`
@@ -164,5 +337,64 @@ describe('ruleResolver', () => {
 
       expect(ruleService.updateRule).toBeCalledWith(ruleId, request);
     });
+  });
+
+  it.each(['USER', 'USER_ADMIN', 'CONTENT_PUBLISHER', undefined])(
+    'should deny access if the user has a role of %s',
+    async (role) => {
+      const ruleId = '1234';
+      const request = {
+        name: 'Motorcycle',
+        link: null,
+        type: 'MOTORCYCLE',
+      };
+
+      const testServer = await createTestServerWithCredentials(
+        await server(createTestContainer(undefined, [role as never])),
+      );
+
+      const response = await testServer
+        .post('/graphql')
+        .send({
+          query: print(gql`
+            mutation($ruleId: ID!, $request: RuleRequest!) {
+              updateRule(ruleId: $ruleId, request: $request) {
+                id
+                name
+              }
+            }
+          `),
+          variables: { request, ruleId },
+        })
+        .expect(200);
+
+      expect(JSON.parse(response.text).errors[0].extensions.code).toBe(403);
+    },
+  );
+
+  it('should deny access if a user is not logged in', async () => {
+    const ruleId = '1234';
+    const request = {
+      name: 'Motorcycle',
+      link: null,
+      type: 'MOTORCYCLE',
+    };
+
+    const response = await httpRequest(await server(createTestContainer()))
+      .post('/graphql')
+      .send({
+        query: print(gql`
+          mutation($ruleId: ID!, $request: RuleRequest!) {
+            updateRule(ruleId: $ruleId, request: $request) {
+              id
+              name
+            }
+          }
+        `),
+        variables: { request, ruleId },
+      })
+      .expect(200);
+
+    expect(JSON.parse(response.text).errors[0].extensions.code).toBe(401);
   });
 });

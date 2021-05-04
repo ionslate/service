@@ -189,7 +189,9 @@ describe('HackingDeviceService', () => {
         .findHackingDeviceById('fake-id')
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
-          expect(e.message).toBe('HackingDevice not found');
+          expect(e.message).toBe(
+            'Resource Not Found - HackingDevice not found',
+          );
         });
     });
   });

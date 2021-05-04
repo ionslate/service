@@ -377,7 +377,7 @@ describe('WeaponService', () => {
         .updateWeaponMode(weapon2.id, weaponMode.id, weaponModeRequest)
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
-          expect(e.message).toBe('WeaponMode not found');
+          expect(e.message).toBe('Resource Not Found - WeaponMode not found');
         });
     });
   });
@@ -400,7 +400,7 @@ describe('WeaponService', () => {
       expect.assertions(2);
       await weaponService.findWeaponById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
-        expect(e.message).toBe('Weapon not found');
+        expect(e.message).toBe('Resource Not Found - Weapon not found');
       });
     });
   });
@@ -621,7 +621,7 @@ describe('WeaponService', () => {
         .removeWeaponMode(weapon2.id, weaponMode.id)
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
-          expect(e.message).toBe('WeaponMode not found');
+          expect(e.message).toBe('Resource Not Found - WeaponMode not found');
         });
     });
   });

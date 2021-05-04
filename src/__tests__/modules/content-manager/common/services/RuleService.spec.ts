@@ -113,7 +113,7 @@ describe('RuleService', () => {
       expect.assertions(2);
       await ruleService.findRuleById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
-        expect(e.message).toBe('Rule not found');
+        expect(e.message).toBe('Resource Not Found - Rule not found');
       });
     });
   });

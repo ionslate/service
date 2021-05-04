@@ -174,7 +174,7 @@ describe('AmmoService', () => {
       expect.assertions(2);
       await ammoService.findAmmoById('fake-id').catch((e: Error) => {
         expect(e).toBeInstanceOf(ResourceNotFound);
-        expect(e.message).toBe('Ammo not found');
+        expect(e.message).toBe('Resource Not Found - Ammo not found');
       });
     });
   });

@@ -2,14 +2,32 @@ import { HackingProgramLoader } from '@content-manager/hacking/loaders/HackingPr
 import { AmmoLoader } from '@content-manager/weapons/loaders/AmmoLoader';
 import { WeaponLoader } from '@content-manager/weapons/loaders/WeaponLoader';
 import { Container } from '@root/container';
+import connectRedis from 'connect-redis';
+import session from 'express-session';
+import redis from 'redis-mock';
+import { UserRole } from '@root/__generatedTypes__';
 
 type TestContainerOptions = Partial<
   Record<keyof Container, jest.Mock | Record<string, jest.Mock>>
 >;
 
-export function createTestContainer(options?: TestContainerOptions): Container {
+export function createTestContainer(
+  options?: TestContainerOptions,
+  userRoles?: UserRole[],
+): Container {
+  const roles = userRoles || [
+    'USER',
+    'USER_ADMIN',
+    'CONTENT_MANAGER',
+    'CONTENT_PUBLISHER',
+  ];
+
   const orm = options?.orm || jest.fn();
   const entityManager = options?.entityManager || { fork: jest.fn() };
+
+  const redisClient = redis.createClient();
+  const RedisStore = connectRedis(session);
+  const sessionStore = new RedisStore({ client: redisClient });
 
   const ruleRepository = options?.ruleRepository || jest.fn();
   const ruleService = options?.ruleService || jest.fn();
@@ -35,8 +53,23 @@ export function createTestContainer(options?: TestContainerOptions): Container {
   const weaponLoader =
     options?.weaponLoader || new WeaponLoader(weaponService as never);
 
+  const userRepository = options?.userRepository || jest.fn();
+  const userService = options?.userService || jest.fn();
+
+  const authService = options?.authService || {
+    login: jest.fn().mockResolvedValue({
+      id: '1234',
+      username: 'foo',
+      password: 'bar',
+      email: 'foobar@example.com',
+      roles,
+    }),
+  };
+
   return ({
     orm,
+    redisClient,
+    sessionStore,
     entityManager,
     ruleRepository,
     ruleService,
@@ -52,5 +85,8 @@ export function createTestContainer(options?: TestContainerOptions): Container {
     weaponModeRepository,
     weaponService,
     weaponLoader,
+    userRepository,
+    userService,
+    authService,
   } as unknown) as Container;
 }
