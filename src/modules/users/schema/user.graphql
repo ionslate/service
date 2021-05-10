@@ -30,7 +30,7 @@ input ChangePasswordRequest {
 }
 
 extend type Query {
-  user: User! @auth
+  user: User
   userById(userId: ID!): User! @auth(requires: USER_ADMIN)
   userList(search: UserSearch, page: Int, limit: Int): PagedUsers! @auth(requires: USER_ADMIN)
 }

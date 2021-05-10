@@ -1,6 +1,7 @@
 import {
   ArrayType,
   BaseEntity,
+  BigIntType,
   EntitySchema,
   ReferenceType,
 } from '@mikro-orm/core';
@@ -43,14 +44,14 @@ export const userSchema = new EntitySchema({
 
 export class PasswordReset {
   resetId?: string;
-  resetExpiration?: number;
+  resetExpiration?: string;
 }
 
 export const passwordResetSchema = new EntitySchema({
   class: PasswordReset,
   properties: {
     resetId: { type: 'string', nullable: true, index: true },
-    resetExpiration: { type: 'number', nullable: true },
+    resetExpiration: { type: BigIntType, nullable: true },
   },
   embeddable: true,
 });

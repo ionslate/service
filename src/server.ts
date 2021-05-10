@@ -47,6 +47,7 @@ async function app(container: Container): Promise<Express> {
     typeDefs,
     resolvers,
     context: createContext(container),
+    introspection: true,
     plugins: [new ApolloLoggingPlugin()],
     formatError: formatApolloError,
     schemaDirectives: {

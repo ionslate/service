@@ -15,9 +15,9 @@ const resetPassword: MutationResolvers['resetPassword'] = async (
   { resetId, password },
   { authService },
 ) => {
-  await authService.resetPassword(resetId, password);
+  const userEntity = await authService.resetPassword(resetId, password);
 
-  return null;
+  return userEntity as never;
 };
 
 const login: MutationResolvers['login'] = async (

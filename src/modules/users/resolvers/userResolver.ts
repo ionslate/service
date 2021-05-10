@@ -7,11 +7,7 @@ import {
 } from '@root/__generatedTypes__';
 
 const user: QueryResolvers['user'] = (_, __, { req }) => {
-  if (!req.session.user) {
-    throw new Error('FORBIDDEN');
-  }
-
-  return req.session.user;
+  return req.session.user || null;
 };
 
 const userById: QueryResolvers['userById'] = async (

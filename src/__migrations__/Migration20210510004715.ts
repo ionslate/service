@@ -1,9 +1,9 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210502214343 extends Migration {
+export class Migration20210510004715 extends Migration {
 
   async up(): Promise<void> {
-    this.addSql('create table "app_user" ("id" varchar(255) not null, "username" varchar(255) not null, "password" varchar(255) null, "email" varchar(255) not null, "roles" text[] not null default \'{USER}\', "active" bool not null default true, "reset_reset_id" varchar(255) null, "reset_reset_expiration" int4 null);');
+    this.addSql('create table "app_user" ("id" varchar(255) not null, "username" varchar(255) not null, "password" varchar(255) null, "email" varchar(255) not null, "roles" text[] not null default \'{USER}\', "active" bool not null default true, "reset_reset_id" varchar(255) null, "reset_reset_expiration" bigint null);');
     this.addSql('alter table "app_user" add constraint "app_user_pkey" primary key ("id");');
     this.addSql('create index "app_user_username_index" on "app_user" ("username");');
     this.addSql('alter table "app_user" add constraint "app_user_username_unique" unique ("username");');

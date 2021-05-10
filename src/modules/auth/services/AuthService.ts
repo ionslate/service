@@ -41,7 +41,7 @@ export class AuthService {
       userEntity.assign(
         {
           reset: {
-            resetExipration: Date.now() + ONE_HOUR,
+            resetExpiration: `${Date.now() + ONE_HOUR}`,
             resetId,
           },
         },
@@ -54,7 +54,7 @@ export class AuthService {
     }
   }
 
-  async resetPassword(resetId: string, password: string): Promise<void> {
+  async resetPassword(resetId: string, password: string): Promise<UserEntity> {
     const userEntity = await this.userRepository.findOne({
       reset: {
         resetId,
@@ -62,7 +62,13 @@ export class AuthService {
       active: true,
     });
 
-    if (!userEntity) {
+    const resetExpiration = userEntity?.reset.resetExpiration
+      ? parseInt(userEntity?.reset.resetExpiration)
+      : 0;
+
+    console.log(resetExpiration, Date.now());
+
+    if (!userEntity || resetExpiration < Date.now()) {
       throw new NotAuthorized();
     }
 
@@ -71,5 +77,7 @@ export class AuthService {
     userEntity.assign({ password: hashedPassword });
 
     await this.userRepository.persistAndFlush(userEntity);
+
+    return userEntity;
   }
 }
