@@ -22,6 +22,7 @@ import { ContextFunction } from 'apollo-server-core';
 import { ExpressContext } from 'apollo-server-express';
 import connectRedis, { RedisStore } from 'connect-redis';
 import Dataloader from 'dataloader';
+import config from '@config/config';
 import { Request, Response } from 'express-serve-static-core';
 import session from 'express-session';
 import RedisClient, { Redis } from 'ioredis';
@@ -53,7 +54,13 @@ export type Container = {
 export async function createContainer(): Promise<Container> {
   const orm = await MikroORM.init(dbConfig);
 
-  const redisClient = new RedisClient();
+  const redisClient = new RedisClient(
+    Number(config.redisPort),
+    config.redisHost,
+    {
+      password: config.redisPassword,
+    },
+  );
   const RedisStore = connectRedis(session);
   const sessionStore = new RedisStore({ client: redisClient });
 

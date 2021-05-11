@@ -9,6 +9,7 @@ import ApolloLoggingPlugin from '@root/logger/ApolloLoggingPlugin';
 import resolvers from '@root/resolvers';
 import { parseSchema } from '@root/utils';
 import { ApolloServer } from 'apollo-server-express';
+import config from '@config/config';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
 import session, { SessionOptions } from 'express-session';
@@ -18,9 +19,12 @@ async function app(container: Container): Promise<Express> {
   const app = express();
 
   const sess: SessionOptions = {
-    secret: 'keyboard cat',
+    secret: config.sessionSecret,
     name: 'user_sid',
-    cookie: {},
+    cookie: {
+      domain: config.cookieDomain,
+      httpOnly: true,
+    },
     saveUninitialized: false,
     resave: false,
     store: container.sessionStore,

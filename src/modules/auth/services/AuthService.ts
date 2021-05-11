@@ -63,10 +63,8 @@ export class AuthService {
     });
 
     const resetExpiration = userEntity?.reset.resetExpiration
-      ? parseInt(userEntity?.reset.resetExpiration)
+      ? Number(userEntity?.reset.resetExpiration)
       : 0;
-
-    console.log(resetExpiration, Date.now());
 
     if (!userEntity || resetExpiration < Date.now()) {
       throw new NotAuthorized();
