@@ -24,6 +24,7 @@ async function app(container: Container): Promise<Express> {
     cookie: {
       domain: config.cookieDomain,
       httpOnly: true,
+      sameSite: 'lax',
     },
     saveUninitialized: false,
     resave: false,

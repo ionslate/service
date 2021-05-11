@@ -2,7 +2,7 @@ import server from '@root/server';
 import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
 import { createTestContainer } from '@test-utils/createTestContainer';
-import { createTestServerWithCredentials } from '@test-utils/createTestServerWithCredentials';
+import { createTestServerWithCredentials } from '@test-utils/mockLogin';
 import httpRequest from 'supertest';
 
 describe('hackingDeviceResolver', () => {

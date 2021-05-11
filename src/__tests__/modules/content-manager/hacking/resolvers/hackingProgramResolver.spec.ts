@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
 import httpRequest from 'supertest';
 import { createTestContainer } from '@test-utils/createTestContainer';
-import { createTestServerWithCredentials } from '@test-utils/createTestServerWithCredentials';
+import { createTestServerWithCredentials } from '@test-utils/mockLogin';
 
 describe('hackingProgramResolver', () => {
   describe('Query.hackingProgramById', () => {
