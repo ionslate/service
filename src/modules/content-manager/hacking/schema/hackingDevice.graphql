@@ -1,0 +1,38 @@
+type HackingDevice {
+  id: ID!
+  name: String!
+  link: String
+  programs: [HackingProgram!]!
+  validationErrors: [ValidationError!]
+}
+
+type PagedHackingDevices {
+  content: [HackingDevice!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+input HackingDeviceRequest {
+  name: String!
+  link: String
+  programIds: [ID!]!
+}
+
+extend type Query {
+  hackingDeviceById(hackingDeviceId: ID!): HackingDevice! @auth(requires: CONTENT_MANAGER)
+  hackingDevicesList(
+    search: Search
+    page: Int
+    limit: Int
+  ): PagedHackingDevices! @auth(requires: CONTENT_MANAGER)
+}
+
+extend type Mutation {
+  createHackingDevice(request: HackingDeviceRequest!): HackingDevice! @auth(requires: CONTENT_MANAGER)
+  updateHackingDevice(
+    hackingDeviceId: ID!
+    request: HackingDeviceRequest!
+  ): HackingDevice! @auth(requires: CONTENT_MANAGER)
+}

@@ -1,0 +1,46 @@
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  roles: [UserRole!]!
+}
+
+type PagedUsers {
+  content: [User!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+input UserRequest {
+  username: String!
+  password: String
+  email: String!
+}
+
+input UserSearch {
+  username: String
+  email: String
+}
+
+input ChangePasswordRequest {
+  oldPassword: String!
+  newPassword: String!
+}
+
+extend type Query {
+  user: User
+  userById(userId: ID!): User! @auth(requires: USER_ADMIN)
+  userList(search: UserSearch, page: Int, limit: Int): PagedUsers! @auth(requires: USER_ADMIN)
+}
+
+extend type Mutation {
+  createUser(request: UserRequest!): User!
+  changePassword(request: ChangePasswordRequest!): Boolean @auth
+  updateUser(userId: ID!, request: UserRequest!): User @auth(requires: USER_ADMIN)
+  removeUser(userId: ID!): ID @auth(requires: USER_ADMIN)
+  remove: ID @auth
+  disableUser(userId: ID!): ID @auth(requires: USER_ADMIN)
+  enableUser(userId: ID!): ID @auth(requires: USER_ADMIN)
+}

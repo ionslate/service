@@ -1,0 +1,42 @@
+enum RuleType {
+  TRANSMUTATION_AUTO
+  TRANSMUTATION_WOUNDS
+  MOTORCYCLE
+  SUPPRESSIVE_FIRE
+  DOCTOR
+  ENGINEER
+  FIRETEAM_CORE
+  FIRETEAM_DUO
+  HIDDEN_DEPLOYMENT
+}
+
+type Rule {
+  id: ID!
+  name: String!
+  link: String
+  type: RuleType
+}
+
+type PagedRules {
+  content: [Rule!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+input RuleRequest {
+  name: String!
+  link: String
+  type: RuleType
+}
+
+extend type Query {
+  ruleById(ruleId: ID!): Rule! @auth(requires: CONTENT_MANAGER)
+  rulesList(search: Search, page: Int, limit: Int): PagedRules! @auth(requires: CONTENT_MANAGER)
+}
+
+extend type Mutation {
+  createRule(request: RuleRequest!): Rule! @auth(requires: CONTENT_MANAGER)
+  updateRule(ruleId: ID!, request: RuleRequest!): Rule! @auth(requires: CONTENT_MANAGER)
+}

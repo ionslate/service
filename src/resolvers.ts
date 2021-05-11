@@ -1,9 +1,11 @@
 import ruleResolver from '@content-manager/common/resolvers/ruleResolver';
-import ammoResolver from '@root/content-manager/weapons/resolvers/ammoResolver';
-import weaponModeResolver from '@root/content-manager/weapons/resolvers/weaponModeResolver';
-import weaponResolver from '@root/content-manager/weapons/resolvers/weaponResolver';
 import hackingDeviceResolver from '@content-manager/hacking/resolvers/hackingDeviceResolver';
 import hackingProgramResolver from '@content-manager/hacking/resolvers/hackingProgramResolvers';
+import ammoResolver from '@content-manager/weapons/resolvers/ammoResolver';
+import weaponModeResolver from '@content-manager/weapons/resolvers/weaponModeResolver';
+import weaponResolver from '@content-manager/weapons/resolvers/weaponResolver';
+import userResolver from '@users/resolvers/userResolver';
+import authResolver from '@auth/resolvers/authResolver';
 import { Resolvers } from '@root/__generatedTypes__';
 
 export default [
@@ -13,4 +15,6 @@ export default [
   ammoResolver,
   weaponModeResolver,
   weaponResolver,
+  authResolver,
+  userResolver,
 ] as Resolvers[];

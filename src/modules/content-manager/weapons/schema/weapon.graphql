@@ -1,0 +1,29 @@
+type Weapon {
+  id: ID!
+  name: String!
+  link: String
+  modes: [WeaponMode!]!
+}
+
+input WeaponRequest {
+  name: String!
+  link: String
+}
+
+type PagedWeapons {
+  content: [Weapon!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+extend type Query {
+  weaponById(weaponId: ID!): Weapon! @auth(requires: CONTENT_MANAGER)
+  weaponsList(search: Search, page: Int, limit: Int): PagedWeapons! @auth(requires: CONTENT_MANAGER)
+}
+
+extend type Mutation {
+  createWeapon(request: WeaponRequest!): Weapon! @auth(requires: CONTENT_MANAGER)
+  updateWeapon(weaponId: ID!, request: WeaponRequest!): Weapon! @auth(requires: CONTENT_MANAGER)
+}

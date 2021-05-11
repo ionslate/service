@@ -6,9 +6,11 @@ export function formatApolloError(e: GraphQLError): GraphQLFormattedError {
     e.message = 'Internal server error...';
   }
 
+  console.error(e);
+
   return {
     message: e.message,
     path: e.path,
-    extensions: { code: e.extensions?.code },
+    extensions: { code: e.extensions?.exception.status || 500 },
   };
 }
