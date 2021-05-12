@@ -1,9 +1,5 @@
 FROM node:12-alpine
 
-ARG api_url
-
-ENV REACT_APP_API_URL=$api_url
-
 ENV NODE_ENV=production
 ENV PORT=8080
 
