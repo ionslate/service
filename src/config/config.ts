@@ -2,7 +2,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const sessionSecret = (process.env.SESSION_SECRET || '').split(',');
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',');
 
 export default {
   dbName: process.env.DB_NAME,
@@ -19,5 +23,6 @@ export default {
   port: process.env.PORT,
   sessionSecret,
   cookieDomain: process.env.COOKIE_DOMAIN,
-  isProduction: process.env.NODE_ENV === 'production',
+  allowedOrigins,
+  isProduction,
 };
