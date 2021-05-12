@@ -18,6 +18,8 @@ import morgan from 'morgan';
 async function app(container: Container): Promise<Express> {
   const app = express();
 
+  app.use(morgan('short', { stream: new LoggerStream() }));
+
   const sess: SessionOptions = {
     secret: config.sessionSecret,
     name: 'user_sid',
@@ -31,14 +33,12 @@ async function app(container: Container): Promise<Express> {
     store: container.sessionStore,
   };
 
+  app.use(session(sess));
+
   if (app.get('env') === 'production' && sess.cookie) {
     app.set('trust proxy', 1); // trust first proxy
     sess.cookie.secure = true; // serve secure cookies
   }
-
-  app.use(session(sess));
-
-  app.use(morgan('short', { stream: new LoggerStream() }));
 
   app.use(express.json());
 
