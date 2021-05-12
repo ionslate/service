@@ -14,11 +14,29 @@ import express from 'express';
 import { Express } from 'express-serve-static-core';
 import session, { SessionOptions } from 'express-session';
 import morgan from 'morgan';
+import cors, { CorsOptions } from 'cors';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
 
   app.use(morgan('short', { stream: new LoggerStream() }));
+
+  const corsOptions: CorsOptions = {
+    credentials: true,
+    // origin: 'http://localhost:3000',
+    allowedHeaders: ['Origin', 'Content-Type'],
+    origin: (origin, cb) => {
+      if (!origin || config.allowedOrigins.indexOf(origin) !== -1) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'));
+      }
+    },
+  };
+
+  app.use(cors(corsOptions));
+
+  // app.options('*', cors(corsOptions) as never);
 
   const sess: SessionOptions = {
     secret: config.sessionSecret,
@@ -60,7 +78,7 @@ async function app(container: Container): Promise<Express> {
     },
   });
 
-  graphqlServer.applyMiddleware({ app });
+  graphqlServer.applyMiddleware({ app, cors: corsOptions });
 
   app.use((_, __, next) => next(new ResourceNotFound()));
 

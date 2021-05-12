@@ -140,19 +140,23 @@ export type AppContext = {
 
 export const createContext = (
   container: Container,
-): ContextFunction<ExpressContext, AppContext> => ({ req, res }) => ({
-  req,
-  res,
-  ruleService: container.ruleService,
-  ammoService: container.ammoService,
-  combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
-  hackingProgramService: container.hackingProgramService,
-  hackingDeviceService: container.hackingDeviceService,
-  hackingProgramLoader: container.hackingProgramLoader.createHackingProgramLoader(),
-  weaponService: container.weaponService,
-  weaponModesLoader: container.weaponLoader.createWeaponModesLoader(),
-  ammoLoader: container.weaponLoader.createAmmoLoader(),
-  traitsLoader: container.weaponLoader.createTraitsLoader(),
-  userService: container.userService,
-  authService: container.authService,
-});
+): ContextFunction<ExpressContext, AppContext> => ({ req, res }) => {
+  // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  console.log('!!!!!', res.getHeader('Access-Control-Allow-Origin'));
+  return {
+    req,
+    res,
+    ruleService: container.ruleService,
+    ammoService: container.ammoService,
+    combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
+    hackingProgramService: container.hackingProgramService,
+    hackingDeviceService: container.hackingDeviceService,
+    hackingProgramLoader: container.hackingProgramLoader.createHackingProgramLoader(),
+    weaponService: container.weaponService,
+    weaponModesLoader: container.weaponLoader.createWeaponModesLoader(),
+    ammoLoader: container.weaponLoader.createAmmoLoader(),
+    traitsLoader: container.weaponLoader.createTraitsLoader(),
+    userService: container.userService,
+    authService: container.authService,
+  };
+};
