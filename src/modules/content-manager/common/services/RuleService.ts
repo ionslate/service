@@ -47,7 +47,7 @@ export class RuleService {
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
-        offset: page,
+        offset: page && limit ? page * limit : undefined,
       },
     );
 

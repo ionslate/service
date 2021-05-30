@@ -44,6 +44,16 @@ const createUser: MutationResolvers['createUser'] = async (
   return userEntity as User;
 };
 
+const adminCreateUser: MutationResolvers['adminCreateUser'] = async (
+  _,
+  { request },
+  { userService },
+) => {
+  const userEntity = await userService.adminCreateUser(request);
+
+  return userEntity as never;
+};
+
 const changePassword: MutationResolvers['changePassword'] = async (
   _,
   { request },
@@ -60,10 +70,10 @@ const changePassword: MutationResolvers['changePassword'] = async (
 
 const updateUser: MutationResolvers['updateUser'] = async (
   _,
-  { userId, request },
+  { userId, request, logUserOut },
   { userService },
 ) => {
-  const userEntity = await userService.updateUser(userId, request);
+  const userEntity = await userService.updateUser(userId, request, logUserOut);
 
   return userEntity as User;
 };
@@ -100,6 +110,14 @@ const enableUser: MutationResolvers['enableUser'] = async (
   return await userService.enableUser(userId);
 };
 
+const forceLogoutUser: MutationResolvers['forceLogoutUser'] = async (
+  _,
+  { userId },
+  { userService },
+) => {
+  return await userService.forceLogoutUser(userId);
+};
+
 export default {
   Query: {
     user,
@@ -108,11 +126,13 @@ export default {
   },
   Mutation: {
     createUser,
+    adminCreateUser,
     changePassword,
     updateUser,
     removeUser,
     remove,
     disableUser,
     enableUser,
+    forceLogoutUser,
   },
 } as Resolvers;

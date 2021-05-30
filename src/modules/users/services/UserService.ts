@@ -1,9 +1,15 @@
 import { QueryOrder } from '@mikro-orm/core';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  EntityRepository,
+  PostgreSqlDriver,
+} from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import {
   ChangePasswordRequest,
+  UserAdminRequest,
   UserRequest,
+  UserRole,
   UserSearch,
 } from '@root/__generatedTypes__';
 import { UserEntity } from '@users/entities/UserEntity';
@@ -11,6 +17,9 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 import { RedisStore } from 'connect-redis';
 import { Forbidden } from '@error/exceptions/Forbidden';
+import { BadRequest } from '@error/exceptions/BadRequest';
+import userAdminRequestSchema from '../validation/userAdminRequestSchema';
+import changePasswordRequestSchema from '../validation/changePasswordRequestSchema';
 
 const ONE_HOUR = 3600000;
 
@@ -18,18 +27,57 @@ export class UserService {
   constructor(
     private userRepository: EntityRepository<UserEntity>,
     private sessionStore: RedisStore,
+    private entityManager: EntityManager<PostgreSqlDriver>,
   ) {}
 
-  async createUser(request: UserRequest): Promise<UserEntity> {
+  private async verifyUsernameAndEmailUnique(
+    username: string,
+    email: string,
+    existingUserId?: string,
+  ) {
+    const qb = this.entityManager.createQueryBuilder(UserEntity);
+
+    const userEntities = await qb
+      .orWhere({ username })
+      .orWhere({ email })
+      .getResult();
+
+    const isUsernameTaken = userEntities.some(
+      (user) => user.username === username && user.id !== existingUserId,
+    );
+
+    if (isUsernameTaken) {
+      throw new BadRequest({
+        field: 'username',
+        message: 'Username already exists.',
+      });
+    }
+
+    const isEmailTaken = userEntities.some(
+      (user) => user.email === email && user.id !== existingUserId,
+    );
+
+    if (isEmailTaken) {
+      throw new BadRequest({
+        field: 'email',
+        message: 'Email already exists.',
+      });
+    }
+  }
+
+  async adminCreateUser(request: UserAdminRequest): Promise<UserEntity> {
+    await userAdminRequestSchema.validate(request);
+    await this.verifyUsernameAndEmailUnique(request.username, request.email);
+
     const password = request.password
       ? await bcrypt.hash(request.password, 10)
       : null;
 
     const userEntity = this.userRepository.create({
-      username: request.username,
+      username: request.username.trim(),
       password,
-      email: request.email,
-      roles: ['USER'],
+      email: request.email.trim(),
+      roles: request.roles,
     });
 
     if (!password) {
@@ -49,12 +97,27 @@ export class UserService {
     return userEntity;
   }
 
-  async updateUser(userId: string, request: UserRequest): Promise<UserEntity> {
+  async createUser(request: UserRequest): Promise<UserEntity> {
+    const userEntity = await this.adminCreateUser({
+      ...request,
+      roles: ['USER'],
+    });
+
+    return userEntity;
+  }
+
+  async updateUser(
+    userId: string,
+    request: UserAdminRequest,
+    logUserOut: boolean,
+  ): Promise<UserEntity> {
+    await userAdminRequestSchema.validate(request);
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
 
     userEntity.assign({
       username: request.username,
       email: request.email,
+      roles: request.roles,
     });
 
     if (request.password) {
@@ -63,6 +126,13 @@ export class UserService {
     }
 
     await this.userRepository.persistAndFlush(userEntity);
+
+    if (logUserOut || request.password) {
+      const userSession = await this.findUserSession(userId);
+      if (userSession) {
+        this.removeSession(userSession);
+      }
+    }
 
     return userEntity;
   }
@@ -138,10 +208,22 @@ export class UserService {
     return userId;
   }
 
+  async forceLogoutUser(userId: string): Promise<string | null> {
+    const sid = await this.findUserSession(userId);
+    if (sid) {
+      await this.removeSession(sid);
+      return userId;
+    }
+
+    return null;
+  }
+
   async changeUserPassword(
     userId: string,
     request: ChangePasswordRequest,
   ): Promise<boolean> {
+    await changePasswordRequestSchema.validate(request);
+
     const userEntity = await this.userRepository.findOneOrFail({
       id: userId,
     });
@@ -172,25 +254,104 @@ export class UserService {
     return await this.userRepository.findOneOrFail({ id: userId });
   }
 
+  private createUserListQueryBuilder({
+    username,
+    email,
+    role,
+    active,
+  }: {
+    username?: string | null;
+    email?: string | null;
+    role?: UserRole | null;
+    active?: boolean | null;
+  }) {
+    const qb = this.entityManager.createQueryBuilder(UserEntity);
+
+    if (username) {
+      qb.orWhere({ username: { $ilike: `%${username}%` } });
+    }
+
+    if (email) {
+      qb.orWhere({ email: { $ilike: `%${email}%` } });
+    }
+
+    if (role) {
+      qb.andWhere({ roles: { $contains: `{${role}}` } });
+    }
+
+    if (typeof active === 'boolean') {
+      qb.andWhere({ active });
+    }
+
+    return qb;
+  }
+
+  private async findUsersBySearchParams(
+    {
+      username,
+      email,
+      role,
+      active,
+    }: {
+      username?: string | null;
+      email?: string | null;
+      role?: UserRole | null;
+      active?: boolean | null;
+    },
+    page?: number,
+    limit?: number,
+  ) {
+    const searchQueryBuilder = this.createUserListQueryBuilder({
+      username,
+      email,
+      role,
+      active,
+    })
+      .orderBy({ username: QueryOrder.ASC })
+      .limit(limit)
+      .offset(page && limit ? page * limit : undefined);
+
+    const userEntities = await searchQueryBuilder.getResult();
+
+    const countQueryBuilder = this.createUserListQueryBuilder({
+      username,
+      email,
+      role,
+      active,
+    }).count();
+
+    const [{ count }] = await countQueryBuilder.execute();
+
+    return paginateEntites(userEntities, count, page, limit);
+  }
+
   async getUsersList(
     search?: UserSearch,
     page?: number,
     limit?: number,
   ): Promise<Page<UserEntity>> {
-    const [userEntities, count] = await this.userRepository.findAndCount(
-      {
-        username: search?.username
-          ? { $ilike: `%${search.username}%` }
-          : undefined,
-        email: search?.email ? { $ilike: `%${search.email}%` } : undefined,
-      },
-      {
-        orderBy: { username: QueryOrder.ASC },
+    if (search?.searchTerm) {
+      return await this.findUsersBySearchParams(
+        {
+          username: search.searchTerm,
+          email: search.searchTerm,
+          role: search.role,
+          active: search.active,
+        },
+        page,
         limit,
-        offset: page,
-      },
-    );
+      );
+    }
 
-    return paginateEntites(userEntities, count, page, limit);
+    return await this.findUsersBySearchParams(
+      {
+        username: search?.username,
+        email: search?.email,
+        role: search?.role,
+        active: search?.active,
+      },
+      page,
+      limit,
+    );
   }
 }

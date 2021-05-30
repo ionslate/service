@@ -3,6 +3,7 @@ type User {
   username: String!
   email: String!
   roles: [UserRole!]!
+  active: Boolean
 }
 
 type PagedUsers {
@@ -19,9 +20,19 @@ input UserRequest {
   email: String!
 }
 
+input UserAdminRequest {
+  username: String!
+  password: String
+  email: String!
+  roles: [UserRole!]!
+}
+
 input UserSearch {
+  searchTerm: String
   username: String
   email: String
+  role: UserRole
+  active: Boolean
 }
 
 input ChangePasswordRequest {
@@ -37,10 +48,12 @@ extend type Query {
 
 extend type Mutation {
   createUser(request: UserRequest!): User!
+  adminCreateUser(request: UserAdminRequest!): User! @auth(requires: USER_ADMIN)
   changePassword(request: ChangePasswordRequest!): Boolean @auth
-  updateUser(userId: ID!, request: UserRequest!): User @auth(requires: USER_ADMIN)
+  updateUser(userId: ID!, request: UserAdminRequest!, logUserOut: Boolean = false): User @auth(requires: USER_ADMIN)
   removeUser(userId: ID!): ID @auth(requires: USER_ADMIN)
   remove: ID @auth
   disableUser(userId: ID!): ID @auth(requires: USER_ADMIN)
   enableUser(userId: ID!): ID @auth(requires: USER_ADMIN)
+  forceLogoutUser(userId: ID!): ID @auth(requires: USER_ADMIN)
 }

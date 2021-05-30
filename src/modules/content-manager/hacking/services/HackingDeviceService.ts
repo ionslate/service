@@ -79,7 +79,7 @@ export class HackingDeviceService {
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
-        offset: page,
+        offset: page && limit ? page * limit : undefined,
       },
     );
 

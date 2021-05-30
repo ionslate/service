@@ -64,7 +64,7 @@ export class AmmoService {
       {
         orderBy: { name: QueryOrder.ASC },
         limit,
-        offset: page,
+        offset: page && limit ? page * limit : undefined,
       },
     );
 

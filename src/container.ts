@@ -93,7 +93,7 @@ export async function createContainer(): Promise<Container> {
   const weaponLoader = new WeaponLoader(weaponService);
 
   const userRepository = orm.em.getRepository(UserEntity);
-  const userService = new UserService(userRepository, sessionStore);
+  const userService = new UserService(userRepository, sessionStore, orm.em);
   const authService = new AuthService(userRepository);
 
   return {
@@ -141,8 +141,6 @@ export type AppContext = {
 export const createContext = (
   container: Container,
 ): ContextFunction<ExpressContext, AppContext> => ({ req, res }) => {
-  // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  console.log('!!!!!', res.getHeader('Access-Control-Allow-Origin'));
   return {
     req,
     res,

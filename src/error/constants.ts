@@ -14,7 +14,6 @@ import {
   TableExistsException,
   TableNotFoundException,
   UniqueConstraintViolationException,
-  ValidationError,
 } from '@mikro-orm/core';
 
 export const DB_ERRORS = [
@@ -33,5 +32,4 @@ export const DB_ERRORS = [
   TableExistsException.name,
   TableNotFoundException.name,
   UniqueConstraintViolationException.name,
-  ValidationError.name,
 ];

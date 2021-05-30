@@ -23,7 +23,6 @@ async function app(container: Container): Promise<Express> {
 
   const corsOptions: CorsOptions = {
     credentials: true,
-    // origin: 'http://localhost:3000',
     allowedHeaders: ['Origin', 'Content-Type'],
     origin: (origin, cb) => {
       if (!origin || config.allowedOrigins.indexOf(origin) !== -1) {
@@ -35,8 +34,6 @@ async function app(container: Container): Promise<Express> {
   };
 
   app.use(cors(corsOptions));
-
-  // app.options('*', cors(corsOptions) as never);
 
   const sess: SessionOptions = {
     secret: config.sessionSecret,
@@ -54,7 +51,7 @@ async function app(container: Container): Promise<Express> {
   app.use(session(sess));
 
   if (app.get('env') === 'production' && sess.cookie) {
-    app.set('trust proxy', 1); // trust first proxy
+    app.set('trust proxy', true); // trust first proxy
     sess.cookie.secure = true; // serve secure cookies
   }
 

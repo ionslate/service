@@ -172,12 +172,13 @@ export class WeaponService {
     page?: number,
     limit?: number,
   ): Promise<Page<WeaponEntity>> {
-    const [
-      weaponEntities,
-      count,
-    ] = await this.weaponRepository.findAndCount(
+    const [weaponEntities, count] = await this.weaponRepository.findAndCount(
       search ? { name: { $ilike: `%${search.name}%` } } : {},
-      { orderBy: { name: QueryOrder.ASC }, limit, offset: page },
+      {
+        orderBy: { name: QueryOrder.ASC },
+        limit,
+        offset: page && limit ? page * limit : undefined,
+      },
     );
 
     return paginateEntites(weaponEntities, count, page, limit);
