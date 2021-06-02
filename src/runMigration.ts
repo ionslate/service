@@ -9,8 +9,14 @@ async function runMigration() {
   try {
     const migrator = orm.getMigrator();
 
+    const [result] = await orm.em.execute(
+      `SELECT EXISTS ( SELECT FROM information_schema."tables" WHERE table_schema = 'public' AND "table_name"='mikro_orm_migrations' )`,
+    );
+
     await orm.em.transactional(async (em) => {
-      await em.execute('LOCK TABLE mikro_orm_migrations IN EXCLUSIVE MODE');
+      if (result?.exists) {
+        await em.execute('LOCK TABLE mikro_orm_migrations IN EXCLUSIVE MODE');
+      }
 
       await migrator.up({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
