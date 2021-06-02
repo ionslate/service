@@ -4,6 +4,8 @@ import { UserEntity } from '@users/entities/UserEntity';
 import bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 import { NotAuthorized } from '@error/exceptions/NotAuthorized';
+import resetPasswordRequestSchema from '../validation/resetPasswordRequestSchema';
+import resetPasswordSchema from '../validation/resetPasswordSchema';
 
 const ONE_HOUR = 3600000;
 
@@ -30,6 +32,8 @@ export class AuthService {
   }
 
   async resetPasswordRequest(email: string): Promise<void> {
+    await resetPasswordRequestSchema.validate({ email });
+
     const userEntity = await this.userRepository.findOne({
       email,
       active: true,
@@ -55,6 +59,8 @@ export class AuthService {
   }
 
   async resetPassword(resetId: string, password: string): Promise<UserEntity> {
+    await resetPasswordSchema.validate({ password });
+
     const userEntity = await this.userRepository.findOne({
       reset: {
         resetId,
