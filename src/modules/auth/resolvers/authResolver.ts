@@ -1,5 +1,7 @@
 import { Resolvers, MutationResolvers, User } from '@root/__generatedTypes__';
 
+const FIVE_MINUTES_IN_SECONDS = 300;
+
 const resetPasswordRequest: MutationResolvers['resetPasswordRequest'] = async (
   _,
   { email },
@@ -23,8 +25,11 @@ const resetPassword: MutationResolvers['resetPassword'] = async (
 const login: MutationResolvers['login'] = async (
   _,
   { request },
-  { authService, req },
+  { authService, req, rateLimiter },
+  info,
 ) => {
+  await rateLimiter.limit(info.fieldName, 3, FIVE_MINUTES_IN_SECONDS);
+
   const userEntity = await authService.login(request);
 
   const user: User = {

@@ -51,7 +51,7 @@ async function app(container: Container): Promise<Express> {
   app.use(session(sess));
 
   if (app.get('env') === 'production' && sess.cookie) {
-    app.set('trust proxy', true); // trust first proxy
+    app.set('trust proxy', 1); // trust first proxy
     sess.cookie.secure = true; // serve secure cookies
   }
 

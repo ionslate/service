@@ -6,6 +6,8 @@ import {
   PagedUsers,
 } from '@root/__generatedTypes__';
 
+const FIVE_MINUTES_IN_SECONDS = 300;
+
 const user: QueryResolvers['user'] = (_, __, { req }) => {
   return req.session.user || null;
 };
@@ -37,8 +39,11 @@ const userList: QueryResolvers['userList'] = async (
 const createUser: MutationResolvers['createUser'] = async (
   _,
   { request },
-  { userService },
+  { userService, rateLimiter },
+  info,
 ) => {
+  await rateLimiter.limit(info.fieldName, 3, FIVE_MINUTES_IN_SECONDS);
+
   const userEntity = await userService.createUser(request);
 
   return userEntity as User;

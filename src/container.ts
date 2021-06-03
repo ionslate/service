@@ -26,6 +26,7 @@ import config from '@config/config';
 import { Request, Response } from 'express-serve-static-core';
 import session from 'express-session';
 import RedisClient, { Redis } from 'ioredis';
+import { RateLimiter } from './modules/service/RateLimiter';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
@@ -136,6 +137,7 @@ export type AppContext = {
   authService: AuthService;
   req: Request;
   res: Response;
+  rateLimiter: RateLimiter;
 };
 
 export const createContext = (
@@ -144,6 +146,7 @@ export const createContext = (
   return {
     req,
     res,
+    rateLimiter: new RateLimiter(container.redisClient, req, res),
     ruleService: container.ruleService,
     ammoService: container.ammoService,
     combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
