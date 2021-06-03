@@ -17,6 +17,7 @@ export function formatApolloError(e: GraphQLError): GraphQLFormattedError {
         e.extensions?.exception.status ||
         (e.extensions?.exception.name === yup.ValidationError.name ? 400 : 500),
       validationError: e.extensions?.exception.validationError,
+      retryAfter: e.extensions?.exception.retryAfter,
     },
   };
 }
