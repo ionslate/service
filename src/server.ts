@@ -24,6 +24,11 @@ async function app(container: Container): Promise<Express> {
 
   app.use(helmet());
 
+  app.get('robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send('User-agent: *\nDisallow: /');
+  });
+
   const corsOptions: CorsOptions = {
     credentials: true,
     allowedHeaders: ['Origin', 'Content-Type'],
