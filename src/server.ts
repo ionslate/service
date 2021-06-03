@@ -15,11 +15,14 @@ import { Express } from 'express-serve-static-core';
 import session, { SessionOptions } from 'express-session';
 import morgan from 'morgan';
 import cors, { CorsOptions } from 'cors';
+import helmet from 'helmet';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
 
   app.use(morgan('short', { stream: new LoggerStream() }));
+
+  app.use(helmet());
 
   const corsOptions: CorsOptions = {
     credentials: true,
