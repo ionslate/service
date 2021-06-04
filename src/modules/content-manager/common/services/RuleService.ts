@@ -11,7 +11,7 @@ export class RuleService {
     private auditService: AuditService,
   ) {}
 
-  async createRule(request: RuleRequest, userId?: string): Promise<RuleEntity> {
+  async createRule(request: RuleRequest): Promise<RuleEntity> {
     const ruleEntity = this.ruleRepository.create({
       name: request.name,
       link: request.link,
@@ -23,17 +23,12 @@ export class RuleService {
     await this.auditService.addCreateAudit({
       entityName: RuleEntity.name,
       resourceName: ruleEntity.name,
-      userId,
     });
 
     return ruleEntity;
   }
 
-  async updateRule(
-    ruleId: string,
-    request: RuleRequest,
-    userId?: string,
-  ): Promise<RuleEntity> {
+  async updateRule(ruleId: string, request: RuleRequest): Promise<RuleEntity> {
     const ruleEntity = await this.ruleRepository.findOneOrFail({ id: ruleId });
 
     const originalRule = ruleEntity.toPOJO();
@@ -51,7 +46,6 @@ export class RuleService {
       resourceName: ruleEntity.name,
       originalValue: originalRule,
       newValue: ruleEntity.toPOJO(),
-      userId,
     });
 
     return ruleEntity;

@@ -24,19 +24,14 @@ const hackingProgramsList: QueryResolvers['hackingProgramsList'] = (
 const createHackingProgram: MutationResolvers['createHackingProgram'] = (
   _,
   { request },
-  { hackingProgramService, req },
-) => hackingProgramService.createHackingProgram(request, req.session.user?.id);
+  { hackingProgramService },
+) => hackingProgramService.createHackingProgram(request);
 
 const updateHackingProgram: MutationResolvers['updateHackingProgram'] = (
   _,
   { hackingProgramId, request },
-  { hackingProgramService, req },
-) =>
-  hackingProgramService.updateHackingProgram(
-    hackingProgramId,
-    request,
-    req.session.user?.id,
-  );
+  { hackingProgramService },
+) => hackingProgramService.updateHackingProgram(hackingProgramId, request);
 
 export default {
   Query: {

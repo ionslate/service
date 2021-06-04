@@ -23,10 +23,7 @@ export class WeaponService {
     private auditService: AuditService,
   ) {}
 
-  async createWeapon(
-    request: WeaponRequest,
-    userId?: string,
-  ): Promise<WeaponEntity> {
+  async createWeapon(request: WeaponRequest): Promise<WeaponEntity> {
     const weaponEntity = this.weaponRepository.create({
       name: request.name,
       link: request.link,
@@ -37,7 +34,6 @@ export class WeaponService {
     await this.auditService.addCreateAudit({
       entityName: WeaponEntity.name,
       resourceName: weaponEntity.name,
-      userId,
     });
 
     return weaponEntity;
@@ -46,7 +42,6 @@ export class WeaponService {
   async createWeaponMode(
     weaponId: string,
     request: WeaponModeRequest,
-    userId?: string,
   ): Promise<WeaponModeEntity> {
     const weaponEntity = await this.weaponRepository.findOneOrFail({
       id: weaponId,
@@ -91,7 +86,6 @@ export class WeaponService {
       entityName: WeaponModeEntity.name,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponEntity.name,
-      userId,
     });
 
     return weaponModeEntity;
@@ -100,7 +94,6 @@ export class WeaponService {
   async updateWeapon(
     weaponId: string,
     request: WeaponRequest,
-    userId?: string,
   ): Promise<WeaponEntity> {
     const weaponEntity = await this.weaponRepository.findOneOrFail({
       id: weaponId,
@@ -119,7 +112,6 @@ export class WeaponService {
       resourceName: weaponEntity.name,
       originalValue: originalWeapon,
       newValue: weaponEntity.toPOJO(),
-      userId,
     });
 
     return weaponEntity;
@@ -129,7 +121,6 @@ export class WeaponService {
     weaponId: string,
     weaponModeId: string,
     request: WeaponModeRequest,
-    userId?: string,
   ): Promise<WeaponModeEntity> {
     const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
       {
@@ -183,7 +174,6 @@ export class WeaponService {
       parentResourceName: weaponModeEntity.weapon.name,
       originalValue: originalWeaponMode,
       newValue: weaponModeEntity.toPOJO(),
-      userId,
     });
 
     return weaponModeEntity;
@@ -192,7 +182,6 @@ export class WeaponService {
   async removeWeaponMode(
     weaponId: string,
     weaponModeId: string,
-    userId?: string,
   ): Promise<string> {
     const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
       {
@@ -211,7 +200,6 @@ export class WeaponService {
       entityName: WeaponModeEntity.name,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponModeEntity.weapon.name,
-      userId,
     });
 
     return weaponModeId;

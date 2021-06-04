@@ -7,12 +7,11 @@ import {
 const createWeaponMode: MutationResolvers['createWeaponMode'] = async (
   _,
   { weaponId, request },
-  { weaponService, req },
+  { weaponService },
 ) => {
   const weaponModeEntity = await weaponService.createWeaponMode(
     weaponId,
     request,
-    req.session.user?.id,
   );
 
   return weaponModeEntity as never;
@@ -21,13 +20,12 @@ const createWeaponMode: MutationResolvers['createWeaponMode'] = async (
 const updateWeaponMode: MutationResolvers['updateWeaponMode'] = async (
   _,
   { weaponId, weaponModeId, request },
-  { weaponService, req },
+  { weaponService },
 ) => {
   const weaponModeEntity = await weaponService.updateWeaponMode(
     weaponId,
     weaponModeId,
     request,
-    req.session.user?.id,
   );
 
   return weaponModeEntity as never;
@@ -36,13 +34,9 @@ const updateWeaponMode: MutationResolvers['updateWeaponMode'] = async (
 const removeWeaponMode: MutationResolvers['removeWeaponMode'] = async (
   _,
   { weaponId, weaponModeId },
-  { weaponService, req },
+  { weaponService },
 ) => {
-  return await weaponService.removeWeaponMode(
-    weaponId,
-    weaponModeId,
-    req.session.user?.id,
-  );
+  return await weaponService.removeWeaponMode(weaponId, weaponModeId);
 };
 
 const ammo: WeaponModeResolvers['ammo'] = async (

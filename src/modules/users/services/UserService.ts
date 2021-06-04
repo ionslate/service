@@ -69,10 +69,7 @@ export class UserService {
     }
   }
 
-  async adminCreateUser(
-    request: UserAdminRequest,
-    adminUserId?: string,
-  ): Promise<UserEntity> {
+  async adminCreateUser(request: UserAdminRequest): Promise<UserEntity> {
     await userAdminRequestSchema.validate(request);
     await this.verifyUsernameAndEmailUnique(request.username, request.email);
 
@@ -102,7 +99,6 @@ export class UserService {
     await this.auditService.addCreateAudit({
       entityName: UserEntity.name,
       resourceName: userEntity.username,
-      userId: adminUserId,
     });
 
     await this.userRepository.persistAndFlush(userEntity);
@@ -159,7 +155,6 @@ export class UserService {
     userId: string,
     request: UserAdminRequest,
     logUserOut: boolean,
-    adminUserId?: string,
   ): Promise<UserEntity> {
     await userAdminRequestSchema.validate(request);
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
@@ -181,7 +176,6 @@ export class UserService {
       resourceName: userEntity.username,
       originalValue: originalUser,
       newValue: userEntity.toPOJO(),
-      userId: adminUserId,
     });
 
     await this.userRepository.persistAndFlush(userEntity);
@@ -192,14 +186,12 @@ export class UserService {
         await this.removeSession(userSession);
         await this.auditService.addAuditMessage(
           `logged ${userEntity.username} out`,
-          adminUserId,
         );
       }
 
       if (request.password) {
         await this.auditService.addAuditMessage(
           `changed ${userEntity.username}'s password`,
-          adminUserId,
         );
       }
     }
@@ -240,7 +232,7 @@ export class UserService {
       });
     });
 
-  async removeUser(userId: string, adminUserId?: string): Promise<string> {
+  async removeUser(userId: string): Promise<string> {
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
 
     const sid = await this.findUserSession(userId);
@@ -253,13 +245,12 @@ export class UserService {
     await this.auditService.addDeleteAudit({
       entityName: UserEntity.name,
       resourceName: userEntity.username,
-      userId: adminUserId,
     });
 
     return userId;
   }
 
-  async disableUser(userId: string, adminUserId?: string): Promise<string> {
+  async disableUser(userId: string): Promise<string> {
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
 
     userEntity.assign({ active: false });
@@ -271,33 +262,24 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
-    await this.auditService.addAuditMessage(
-      `disabled ${userEntity.username}`,
-      adminUserId,
-    );
+    await this.auditService.addAuditMessage(`disabled ${userEntity.username}`);
 
     return userId;
   }
 
-  async enableUser(userId: string, adminUserId?: string): Promise<string> {
+  async enableUser(userId: string): Promise<string> {
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
 
     userEntity.assign({ active: true });
 
     await this.userRepository.persistAndFlush(userEntity);
 
-    await this.auditService.addAuditMessage(
-      `enabled ${userEntity.username}`,
-      adminUserId,
-    );
+    await this.auditService.addAuditMessage(`enabled ${userEntity.username}`);
 
     return userId;
   }
 
-  async forceLogoutUser(
-    userId: string,
-    adminUserId?: string,
-  ): Promise<string | null> {
+  async forceLogoutUser(userId: string): Promise<string | null> {
     const userEntity = await this.userRepository.findOneOrFail({
       id: userId,
     });
@@ -308,7 +290,6 @@ export class UserService {
 
       await this.auditService.addAuditMessage(
         `logged ${userEntity.username} out`,
-        adminUserId,
       );
 
       return userId;

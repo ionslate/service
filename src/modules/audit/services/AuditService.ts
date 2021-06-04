@@ -1,26 +1,24 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { difference } from '@root/utils';
-import { UserEntity } from '../../users/entities/UserEntity';
-import { AuditEntity } from '../entities/AuditEntity';
+import { UserEntity } from '@users/entities/UserEntity';
+import { AuditEntity } from '@audit/entities/AuditEntity';
 import isEqual from 'lodash/isEqual';
+import { getAppContext } from '@root/appContext';
 
 interface CreateAuditArgs {
   entityName: string;
-  userId?: string;
   resourceName: string;
   parentResourceName?: string;
 }
 
 interface DeleteAuditArgs {
   entityName: string;
-  userId?: string;
   resourceName: string;
   parentResourceName?: string;
 }
 
 interface UpdateAuditArgs {
   entityName: string;
-  userId?: string;
   resourceName: string;
   parentResourceName?: string;
   originalValue: Record<string, unknown>;
@@ -37,9 +35,9 @@ export class AuditService {
     entityName,
     resourceName,
     parentResourceName,
-    userId,
   }: CreateAuditArgs): Promise<void> {
-    const userEntity = await this.userRepository.findOne({ id: userId });
+    const { user } = getAppContext();
+    const userEntity = await this.userRepository.findOne({ id: user?.id });
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
@@ -60,13 +58,13 @@ export class AuditService {
     parentResourceName,
     originalValue,
     newValue,
-    userId,
   }: UpdateAuditArgs): Promise<void> {
     const originalDiff = difference(originalValue, newValue);
     const newDiff = difference(newValue, originalValue);
 
     if (!isEqual(originalDiff, newDiff)) {
-      const userEntity = await this.userRepository.findOne({ id: userId });
+      const { user } = getAppContext();
+      const userEntity = await this.userRepository.findOne({ id: user?.id });
 
       const auditEntity = this.auditRepository.create({
         user: userEntity,
@@ -87,9 +85,9 @@ export class AuditService {
     entityName,
     resourceName,
     parentResourceName,
-    userId,
   }: DeleteAuditArgs): Promise<void> {
-    const userEntity = await this.userRepository.findOne({ id: userId });
+    const { user } = getAppContext();
+    const userEntity = await this.userRepository.findOne({ id: user?.id });
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
@@ -104,8 +102,9 @@ export class AuditService {
     await this.auditRepository.persistAndFlush(auditEntity);
   }
 
-  async addAuditMessage(message: string, userId?: string): Promise<void> {
-    const userEntity = await this.userRepository.findOne({ id: userId });
+  async addAuditMessage(message: string): Promise<void> {
+    const { user } = getAppContext();
+    const userEntity = await this.userRepository.findOne({ id: user?.id });
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,

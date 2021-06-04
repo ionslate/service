@@ -52,12 +52,9 @@ const createUser: MutationResolvers['createUser'] = async (
 const adminCreateUser: MutationResolvers['adminCreateUser'] = async (
   _,
   { request },
-  { userService, req },
+  { userService },
 ) => {
-  const userEntity = await userService.adminCreateUser(
-    request,
-    req.session.user?.id,
-  );
+  const userEntity = await userService.adminCreateUser(request);
 
   return userEntity as never;
 };
@@ -79,14 +76,9 @@ const changePassword: MutationResolvers['changePassword'] = async (
 const updateUser: MutationResolvers['updateUser'] = async (
   _,
   { userId, request, logUserOut },
-  { userService, req },
+  { userService },
 ) => {
-  const userEntity = await userService.updateUser(
-    userId,
-    request,
-    logUserOut,
-    req.session.user?.id,
-  );
+  const userEntity = await userService.updateUser(userId, request, logUserOut);
 
   return userEntity as User;
 };
@@ -94,9 +86,9 @@ const updateUser: MutationResolvers['updateUser'] = async (
 const removeUser: MutationResolvers['removeUser'] = async (
   _,
   { userId },
-  { userService, req },
+  { userService },
 ) => {
-  return await userService.removeUser(userId, req.session.user?.id);
+  return await userService.removeUser(userId);
 };
 
 const remove: MutationResolvers['remove'] = async (
@@ -110,25 +102,25 @@ const remove: MutationResolvers['remove'] = async (
 const disableUser: MutationResolvers['disableUser'] = async (
   _,
   { userId },
-  { userService, req },
+  { userService },
 ) => {
-  return await userService.disableUser(userId, req.session.user?.id);
+  return await userService.disableUser(userId);
 };
 
 const enableUser: MutationResolvers['enableUser'] = async (
   _,
   { userId },
-  { userService, req },
+  { userService },
 ) => {
-  return await userService.enableUser(userId, req.session.user?.id);
+  return await userService.enableUser(userId);
 };
 
 const forceLogoutUser: MutationResolvers['forceLogoutUser'] = async (
   _,
   { userId },
-  { userService, req },
+  { userService },
 ) => {
-  return await userService.forceLogoutUser(userId, req.session.user?.id);
+  return await userService.forceLogoutUser(userId);
 };
 
 const resetPasswordRequest: MutationResolvers['resetPasswordRequest'] = async (

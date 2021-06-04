@@ -11,7 +11,7 @@ export class AmmoService {
     private auditService: AuditService,
   ) {}
 
-  async createAmmo(request: AmmoRequest, userId?: string): Promise<AmmoEntity> {
+  async createAmmo(request: AmmoRequest): Promise<AmmoEntity> {
     const ammoEntity = this.ammoRepository.create({
       name: request.name,
       link: request.link,
@@ -24,17 +24,12 @@ export class AmmoService {
     await this.auditService.addCreateAudit({
       entityName: AmmoEntity.name,
       resourceName: ammoEntity.name,
-      userId,
     });
 
     return ammoEntity;
   }
 
-  async updateAmmo(
-    ammoId: string,
-    request: AmmoRequest,
-    userId?: string,
-  ): Promise<AmmoEntity> {
+  async updateAmmo(ammoId: string, request: AmmoRequest): Promise<AmmoEntity> {
     const ammoEntity = await this.ammoRepository.findOneOrFail({ id: ammoId });
     await ammoEntity.combinedAmmo.init();
     const originalAmmo = ammoEntity.toPOJO();
@@ -55,7 +50,6 @@ export class AmmoService {
       resourceName: originalAmmo.name,
       originalValue: originalAmmo,
       newValue: ammoEntity.toPOJO(),
-      userId,
     });
 
     return ammoEntity;

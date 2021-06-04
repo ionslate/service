@@ -32,12 +32,9 @@ const ammoList: QueryResolvers['ammoList'] = async (
 const createAmmo: MutationResolvers['createAmmo'] = async (
   _,
   { request },
-  { ammoService, req },
+  { ammoService },
 ) => {
-  const ammoEntity = await ammoService.createAmmo(
-    request,
-    req.session.user?.id,
-  );
+  const ammoEntity = await ammoService.createAmmo(request);
 
   return ammoEntity as never;
 };
@@ -45,13 +42,9 @@ const createAmmo: MutationResolvers['createAmmo'] = async (
 const updateAmmo: MutationResolvers['updateAmmo'] = async (
   _,
   { ammoId, request },
-  { ammoService, req },
+  { ammoService },
 ) => {
-  const ammoEntity = await ammoService.updateAmmo(
-    ammoId,
-    request,
-    req.session.user?.id,
-  );
+  const ammoEntity = await ammoService.updateAmmo(ammoId, request);
 
   return ammoEntity as never;
 };

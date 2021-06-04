@@ -13,7 +13,6 @@ export class HackingProgramService {
 
   async createHackingProgram(
     request: HackingProgramRequest,
-    userId?: string,
   ): Promise<HackingProgramEntity> {
     const hackingProgramEntity = this.hackingProgramRepository.create({
       name: request.name,
@@ -32,7 +31,6 @@ export class HackingProgramService {
     await this.auditService.addCreateAudit({
       entityName: HackingProgramEntity.name,
       resourceName: hackingProgramEntity.name,
-      userId,
     });
 
     return hackingProgramEntity;
@@ -41,7 +39,6 @@ export class HackingProgramService {
   async updateHackingProgram(
     hackingDeviceId: string,
     request: HackingProgramRequest,
-    userId?: string,
   ): Promise<HackingProgramEntity> {
     const hackingProgramEntity = await this.hackingProgramRepository.findOneOrFail(
       { id: hackingDeviceId },
@@ -67,7 +64,6 @@ export class HackingProgramService {
       resourceName: hackingProgramEntity.name,
       originalValue: originalHackingProgram,
       newValue: hackingProgramEntity.toPOJO(),
-      userId,
     });
 
     return hackingProgramEntity;
