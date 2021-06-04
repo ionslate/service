@@ -12,6 +12,7 @@ import {
   WeaponRequest,
 } from '@root/__generatedTypes__';
 import groupBy from 'lodash/groupBy';
+import { AuditService } from '@audit/services/AuditService';
 
 export class WeaponService {
   constructor(
@@ -19,22 +20,33 @@ export class WeaponService {
     private weaponModeRepository: EntityRepository<WeaponModeEntity>,
     private ammoRepository: EntityRepository<AmmoEntity>,
     private ruleRepository: EntityRepository<RuleEntity>,
+    private auditService: AuditService,
   ) {}
 
-  async createWeapon(request: WeaponRequest): Promise<WeaponEntity> {
-    const WeaponEntity = this.weaponRepository.create({
+  async createWeapon(
+    request: WeaponRequest,
+    userId?: string,
+  ): Promise<WeaponEntity> {
+    const weaponEntity = this.weaponRepository.create({
       name: request.name,
       link: request.link,
     });
 
-    await this.weaponRepository.persistAndFlush(WeaponEntity);
+    await this.weaponRepository.persistAndFlush(weaponEntity);
 
-    return WeaponEntity;
+    await this.auditService.addCreateAudit({
+      entityName: WeaponEntity.name,
+      resourceName: weaponEntity.name,
+      userId,
+    });
+
+    return weaponEntity;
   }
 
   async createWeaponMode(
     weaponId: string,
     request: WeaponModeRequest,
+    userId?: string,
   ): Promise<WeaponModeEntity> {
     const weaponEntity = await this.weaponRepository.findOneOrFail({
       id: weaponId,
@@ -75,16 +87,25 @@ export class WeaponService {
 
     await this.weaponRepository.persistAndFlush(weaponModeEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: WeaponModeEntity.name,
+      resourceName: weaponModeEntity.name,
+      parentResourceName: weaponEntity.name,
+      userId,
+    });
+
     return weaponModeEntity;
   }
 
   async updateWeapon(
     weaponId: string,
     request: WeaponRequest,
+    userId?: string,
   ): Promise<WeaponEntity> {
     const weaponEntity = await this.weaponRepository.findOneOrFail({
       id: weaponId,
     });
+    const originalWeapon = weaponEntity.toPOJO();
 
     weaponEntity.assign({
       name: request.name,
@@ -93,6 +114,14 @@ export class WeaponService {
 
     await this.weaponRepository.persistAndFlush(weaponEntity);
 
+    await this.auditService.addUpdateAudit({
+      entityName: WeaponEntity.name,
+      resourceName: weaponEntity.name,
+      originalValue: originalWeapon,
+      newValue: weaponEntity.toPOJO(),
+      userId,
+    });
+
     return weaponEntity;
   }
 
@@ -100,14 +129,22 @@ export class WeaponService {
     weaponId: string,
     weaponModeId: string,
     request: WeaponModeRequest,
+    userId?: string,
   ): Promise<WeaponModeEntity> {
-    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail({
-      id: weaponModeId,
-    });
+    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
+      {
+        id: weaponModeId,
+      },
+      { weapon: true },
+    );
 
     if (weaponModeEntity.weapon.id !== weaponId) {
       throw new ResourceNotFound('WeaponMode not found');
     }
+
+    await weaponModeEntity.ammo.init();
+    await weaponModeEntity.traits.init();
+    const originalWeaponMode = weaponModeEntity.toPOJO();
 
     const ammoEntities = await this.ammoRepository.find({
       id: { $in: request.ammoIds },
@@ -117,10 +154,7 @@ export class WeaponService {
       { orderBy: { name: QueryOrder.ASC } },
     );
 
-    await weaponModeEntity.ammo.init();
     weaponModeEntity.ammo.removeAll();
-
-    await weaponModeEntity.traits.init();
     weaponModeEntity.traits.removeAll();
 
     weaponModeEntity.assign({
@@ -143,22 +177,42 @@ export class WeaponService {
 
     await this.weaponModeRepository.persistAndFlush(weaponModeEntity);
 
+    await this.auditService.addUpdateAudit({
+      entityName: WeaponModeEntity.name,
+      resourceName: weaponModeEntity.name,
+      parentResourceName: weaponModeEntity.weapon.name,
+      originalValue: originalWeaponMode,
+      newValue: weaponModeEntity.toPOJO(),
+      userId,
+    });
+
     return weaponModeEntity;
   }
 
   async removeWeaponMode(
     weaponId: string,
     weaponModeId: string,
+    userId?: string,
   ): Promise<string> {
-    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail({
-      id: weaponModeId,
-    });
+    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
+      {
+        id: weaponModeId,
+      },
+      { weapon: true },
+    );
 
     if (weaponModeEntity.weapon.id !== weaponId) {
       throw new ResourceNotFound('WeaponMode not found');
     }
 
     await this.weaponModeRepository.removeAndFlush(weaponModeEntity);
+
+    this.auditService.addDeleteAudit({
+      entityName: WeaponModeEntity.name,
+      resourceName: weaponModeEntity.name,
+      parentResourceName: weaponModeEntity.weapon.name,
+      userId,
+    });
 
     return weaponModeId;
   }

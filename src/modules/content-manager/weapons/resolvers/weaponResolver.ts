@@ -32,9 +32,12 @@ const weaponsList: QueryResolvers['weaponsList'] = async (
 const createWeapon: MutationResolvers['createWeapon'] = async (
   _,
   { request },
-  { weaponService },
+  { weaponService, req },
 ) => {
-  const weaponEntity = await weaponService.createWeapon(request);
+  const weaponEntity = await weaponService.createWeapon(
+    request,
+    req.session.user?.id,
+  );
 
   return weaponEntity as never;
 };
@@ -42,9 +45,13 @@ const createWeapon: MutationResolvers['createWeapon'] = async (
 const updateWeapon: MutationResolvers['updateWeapon'] = async (
   _,
   { weaponId, request },
-  { weaponService },
+  { weaponService, req },
 ) => {
-  const weaponEntity = await weaponService.updateWeapon(weaponId, request);
+  const weaponEntity = await weaponService.updateWeapon(
+    weaponId,
+    request,
+    req.session.user?.id,
+  );
 
   return weaponEntity as never;
 };

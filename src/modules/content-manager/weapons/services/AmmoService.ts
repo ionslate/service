@@ -3,11 +3,15 @@ import { LoadStrategy, QueryOrder } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import { AmmoRequest, Search } from '@root/__generatedTypes__';
+import { AuditService } from '@audit/services/AuditService';
 
 export class AmmoService {
-  constructor(private ammoRepository: EntityRepository<AmmoEntity>) {}
+  constructor(
+    private ammoRepository: EntityRepository<AmmoEntity>,
+    private auditService: AuditService,
+  ) {}
 
-  async createAmmo(request: AmmoRequest): Promise<AmmoEntity> {
+  async createAmmo(request: AmmoRequest, userId?: string): Promise<AmmoEntity> {
     const ammoEntity = this.ammoRepository.create({
       name: request.name,
       link: request.link,
@@ -17,24 +21,42 @@ export class AmmoService {
 
     await this.ammoRepository.persistAndFlush(ammoEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: AmmoEntity.name,
+      resourceName: ammoEntity.name,
+      userId,
+    });
+
     return ammoEntity;
   }
 
-  async updateAmmo(ammoId: string, request: AmmoRequest): Promise<AmmoEntity> {
+  async updateAmmo(
+    ammoId: string,
+    request: AmmoRequest,
+    userId?: string,
+  ): Promise<AmmoEntity> {
     const ammoEntity = await this.ammoRepository.findOneOrFail({ id: ammoId });
+    await ammoEntity.combinedAmmo.init();
+    const originalAmmo = ammoEntity.toPOJO();
 
     ammoEntity.assign({
       name: request.name,
       link: request.link,
     });
 
-    await ammoEntity.combinedAmmo.init();
-
     ammoEntity.combinedAmmo.removeAll();
 
     await this.addCombinedAmmo(request.combinedAmmoIds, ammoEntity);
 
     await this.ammoRepository.persistAndFlush(ammoEntity);
+
+    await this.auditService.addUpdateAudit({
+      entityName: AmmoEntity.name,
+      resourceName: originalAmmo.name,
+      originalValue: originalAmmo,
+      newValue: ammoEntity.toPOJO(),
+      userId,
+    });
 
     return ammoEntity;
   }

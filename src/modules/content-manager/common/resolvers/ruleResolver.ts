@@ -12,9 +12,9 @@ export default {
       ),
   },
   Mutation: {
-    createRule: (_, { request }, { ruleService }) =>
-      ruleService.createRule(request),
-    updateRule: (_, { ruleId, request }, { ruleService }) =>
-      ruleService.updateRule(ruleId, request),
+    createRule: (_, { request }, { ruleService, req }) =>
+      ruleService.createRule(request, req.session.user?.id),
+    updateRule: (_, { ruleId, request }, { ruleService, req }) =>
+      ruleService.updateRule(ruleId, request, req.session.user?.id),
   },
 } as Resolvers;

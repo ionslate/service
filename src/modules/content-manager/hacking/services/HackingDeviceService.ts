@@ -4,15 +4,18 @@ import { QueryOrder } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import { HackingDeviceRequest, Search } from '@root/__generatedTypes__';
+import { AuditService } from '@audit/services/AuditService';
 
 export class HackingDeviceService {
   constructor(
     private hackingDeviceRepository: EntityRepository<HackingDeviceEntity>,
     private hackingProgramRepository: EntityRepository<HackingProgramEntity>,
+    private auditService: AuditService,
   ) {}
 
   async createHackingDevice(
     request: HackingDeviceRequest,
+    userId?: string,
   ): Promise<HackingDeviceEntity> {
     const hackingDeviceEntity = this.hackingDeviceRepository.create({
       name: request.name,
@@ -27,23 +30,31 @@ export class HackingDeviceService {
 
     await this.hackingProgramRepository.persistAndFlush(hackingDeviceEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: HackingDeviceEntity.name,
+      resourceName: hackingDeviceEntity.name,
+      userId,
+    });
+
     return hackingDeviceEntity;
   }
 
   async updateHackingDevice(
     hackingDeviceId: string,
     request: HackingDeviceRequest,
+    userId?: string,
   ): Promise<HackingDeviceEntity> {
     const hackingDeviceEntity = await this.hackingDeviceRepository.findOneOrFail(
       { id: hackingDeviceId },
     );
+    await hackingDeviceEntity.programs.init();
+
+    const originalHackingDevice = hackingDeviceEntity.toPOJO();
 
     hackingDeviceEntity.assign({
       name: request.name,
       link: request.link,
     });
-
-    await hackingDeviceEntity.programs.init();
 
     hackingDeviceEntity.programs.removeAll();
 
@@ -54,6 +65,14 @@ export class HackingDeviceService {
     hackingDeviceEntity.programs.add(...hackingProgramEntities);
 
     await this.hackingProgramRepository.persistAndFlush(hackingDeviceEntity);
+
+    await this.auditService.addUpdateAudit({
+      entityName: HackingDeviceEntity.name,
+      resourceName: hackingDeviceEntity.name,
+      originalValue: originalHackingDevice,
+      newValue: hackingDeviceEntity.toPOJO(),
+      userId,
+    });
 
     return hackingDeviceEntity;
   }

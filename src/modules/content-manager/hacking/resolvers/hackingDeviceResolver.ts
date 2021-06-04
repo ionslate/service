@@ -34,10 +34,11 @@ const hackingDevicesList: QueryResolvers['hackingDevicesList'] = async (
 const createHackingDevice: MutationResolvers['createHackingDevice'] = async (
   _,
   { request },
-  { hackingDeviceService },
+  { hackingDeviceService, req },
 ) => {
   const hackingDeviceEntity = await hackingDeviceService.createHackingDevice(
     request,
+    req.session.user?.id,
   );
 
   return hackingDeviceEntity as never;
@@ -46,11 +47,12 @@ const createHackingDevice: MutationResolvers['createHackingDevice'] = async (
 const updateHackingDevice: MutationResolvers['updateHackingDevice'] = async (
   _,
   { hackingDeviceId, request },
-  { hackingDeviceService },
+  { hackingDeviceService, req },
 ) => {
   const hackingDeviceEntity = await hackingDeviceService.updateHackingDevice(
     hackingDeviceId,
     request,
+    req.session.user?.id,
   );
 
   return hackingDeviceEntity as never;

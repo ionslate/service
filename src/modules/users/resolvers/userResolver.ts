@@ -6,7 +6,7 @@ import {
   PagedUsers,
 } from '@root/__generatedTypes__';
 
-const FIVE_MINUTES_IN_SECONDS = 300;
+const ONE_DAY_IN_SECONDS = 86400;
 
 const user: QueryResolvers['user'] = (_, __, { req }) => {
   return req.session.user || null;
@@ -42,19 +42,22 @@ const createUser: MutationResolvers['createUser'] = async (
   { userService, rateLimiter },
   info,
 ) => {
-  await rateLimiter.limit(info.fieldName, 3, FIVE_MINUTES_IN_SECONDS);
+  await rateLimiter.limit(info.fieldName, 10, ONE_DAY_IN_SECONDS);
 
-  const userEntity = await userService.createUser(request);
+  await userService.createUser(request);
 
-  return userEntity as User;
+  return null;
 };
 
 const adminCreateUser: MutationResolvers['adminCreateUser'] = async (
   _,
   { request },
-  { userService },
+  { userService, req },
 ) => {
-  const userEntity = await userService.adminCreateUser(request);
+  const userEntity = await userService.adminCreateUser(
+    request,
+    req.session.user?.id,
+  );
 
   return userEntity as never;
 };
@@ -76,9 +79,14 @@ const changePassword: MutationResolvers['changePassword'] = async (
 const updateUser: MutationResolvers['updateUser'] = async (
   _,
   { userId, request, logUserOut },
-  { userService },
+  { userService, req },
 ) => {
-  const userEntity = await userService.updateUser(userId, request, logUserOut);
+  const userEntity = await userService.updateUser(
+    userId,
+    request,
+    logUserOut,
+    req.session.user?.id,
+  );
 
   return userEntity as User;
 };
@@ -86,9 +94,9 @@ const updateUser: MutationResolvers['updateUser'] = async (
 const removeUser: MutationResolvers['removeUser'] = async (
   _,
   { userId },
-  { userService },
+  { userService, req },
 ) => {
-  return await userService.removeUser(userId);
+  return await userService.removeUser(userId, req.session.user?.id);
 };
 
 const remove: MutationResolvers['remove'] = async (
@@ -102,25 +110,47 @@ const remove: MutationResolvers['remove'] = async (
 const disableUser: MutationResolvers['disableUser'] = async (
   _,
   { userId },
-  { userService },
+  { userService, req },
 ) => {
-  return await userService.disableUser(userId);
+  return await userService.disableUser(userId, req.session.user?.id);
 };
 
 const enableUser: MutationResolvers['enableUser'] = async (
   _,
   { userId },
-  { userService },
+  { userService, req },
 ) => {
-  return await userService.enableUser(userId);
+  return await userService.enableUser(userId, req.session.user?.id);
 };
 
 const forceLogoutUser: MutationResolvers['forceLogoutUser'] = async (
   _,
   { userId },
+  { userService, req },
+) => {
+  return await userService.forceLogoutUser(userId, req.session.user?.id);
+};
+
+const resetPasswordRequest: MutationResolvers['resetPasswordRequest'] = async (
+  _,
+  { email },
+  { userService, rateLimiter },
+  info,
+) => {
+  await rateLimiter.limit(info.fieldName, 10, ONE_DAY_IN_SECONDS);
+  await userService.resetPasswordRequest(email);
+
+  return null;
+};
+
+const resetPassword: MutationResolvers['resetPassword'] = async (
+  _,
+  { resetId, password },
   { userService },
 ) => {
-  return await userService.forceLogoutUser(userId);
+  const userEntity = await userService.resetPassword(resetId, password);
+
+  return userEntity as never;
 };
 
 export default {
@@ -139,5 +169,7 @@ export default {
     disableUser,
     enableUser,
     forceLogoutUser,
+    resetPasswordRequest,
+    resetPassword,
   },
 } as Resolvers;
