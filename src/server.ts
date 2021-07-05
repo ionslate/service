@@ -72,7 +72,6 @@ async function app(container: Container): Promise<Express> {
 
   app.use((req, _, next) => {
     appContext.run(new Map(), () => {
-      // appContext.getStore()?.set('user', req.session.user);
       setAppContext({ user: req.session.user });
       next();
     });

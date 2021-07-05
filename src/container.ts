@@ -138,6 +138,7 @@ export async function createContainer(): Promise<Container> {
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
+  auditService: AuditService;
   combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
   hackingProgramService: HackingProgramService;
   hackingDeviceService: HackingDeviceService;
@@ -162,6 +163,7 @@ export const createContext = (
     rateLimiter: new RateLimiter(container.redisClient, req, res),
     ruleService: container.ruleService,
     ammoService: container.ammoService,
+    auditService: container.auditService,
     combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
     hackingProgramService: container.hackingProgramService,
     hackingDeviceService: container.hackingDeviceService,

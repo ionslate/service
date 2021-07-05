@@ -1,9 +1,12 @@
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { difference } from '@root/utils';
-import { UserEntity } from '@users/entities/UserEntity';
 import { AuditEntity } from '@audit/entities/AuditEntity';
-import isEqual from 'lodash/isEqual';
+import { QueryOrder } from '@mikro-orm/core';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { getAppContext } from '@root/appContext';
+import { difference, Page, paginateEntites } from '@root/utils';
+import { Audit } from '@root/__generatedTypes__';
+import { UserEntity } from '@users/entities/UserEntity';
+import isEqual from 'lodash/isEqual';
+import { buildAudit } from '@audit/utils/auditUtils';
 
 interface CreateAuditArgs {
   entityName: string;
@@ -25,6 +28,13 @@ interface UpdateAuditArgs {
   newValue: Record<string, unknown>;
 }
 
+interface CustomAuditArgs {
+  action: string;
+  entityName: string;
+  resourceName: string;
+  parentResourceName?: string;
+}
+
 export class AuditService {
   constructor(
     private auditRepository: EntityRepository<AuditEntity>,
@@ -42,7 +52,7 @@ export class AuditService {
     const auditEntity = this.auditRepository.create({
       user: userEntity,
       data: {
-        action: 'CREATE',
+        type: 'CREATE',
         entityName,
         resourceName,
         parentResourceName,
@@ -69,7 +79,7 @@ export class AuditService {
       const auditEntity = this.auditRepository.create({
         user: userEntity,
         data: {
-          action: 'UPDATE',
+          type: 'UPDATE',
           entityName,
           resourceName,
           parentResourceName,
@@ -92,7 +102,7 @@ export class AuditService {
     const auditEntity = this.auditRepository.create({
       user: userEntity,
       data: {
-        action: 'DELETE',
+        type: 'DELETE',
         entityName,
         resourceName,
         parentResourceName,
@@ -102,18 +112,40 @@ export class AuditService {
     await this.auditRepository.persistAndFlush(auditEntity);
   }
 
-  async addAuditMessage(message: string): Promise<void> {
+  async addCustomAudit({
+    action,
+    entityName,
+    resourceName,
+    parentResourceName,
+  }: CustomAuditArgs): Promise<void> {
     const { user } = getAppContext();
     const userEntity = await this.userRepository.findOne({ id: user?.id });
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
       data: {
-        action: 'MESSAGE',
-        message,
+        type: 'CUSTOM',
+        action,
+        entityName,
+        resourceName,
+        parentResourceName,
       },
     });
 
     await this.auditRepository.persistAndFlush(auditEntity);
+  }
+
+  async getAuditList(page?: number, limit?: number): Promise<Page<Audit>> {
+    const [auditEntities, count] = await this.auditRepository.findAndCount(
+      {},
+      {
+        populate: { user: true },
+        orderBy: { id: QueryOrder.DESC, createdAt: QueryOrder.DESC },
+        limit,
+        offset: page && limit ? page * limit : undefined,
+      },
+    );
+
+    return paginateEntites(auditEntities.map(buildAudit), count, page, limit);
   }
 }

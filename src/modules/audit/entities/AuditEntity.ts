@@ -1,42 +1,44 @@
-import { BaseEntity, DateType, EntitySchema, JsonType } from '@mikro-orm/core';
-import { v4 as uuid } from 'uuid';
-import { UserEntity } from '../../users/entities/UserEntity';
+import { BaseEntity, EntitySchema, JsonType } from '@mikro-orm/core';
+import { UserEntity } from '@users/entities/UserEntity';
 
-interface CreateAuditData {
-  action: 'CREATE';
-  enitityName: string;
+export interface CreateAuditData {
+  type: 'CREATE';
+  entityName: string;
   parentResourceName?: string;
   resourceName: string;
 }
 
-interface UpdateAuditData {
-  action: 'UPDATE';
-  enitityName: string;
+export interface UpdateAuditData {
+  type: 'UPDATE';
+  entityName: string;
   resourceName: string;
   parentResourceName?: string;
   diff: [Record<string, unknown>, Record<string, unknown>];
 }
 
-interface DeleteAuditData {
-  action: 'DELETE';
-  enitityName: string;
+export interface DeleteAuditData {
+  type: 'DELETE';
+  entityName: string;
   parentResourceName?: string;
   resourceName: string;
 }
 
-interface AuditMessageData {
-  action: 'MESSAGE';
-  message: string;
+export interface AuditCustomData {
+  type: 'CUSTOM';
+  action: string;
+  entityName: string;
+  resourceName: string;
+  parentResourceName?: string;
 }
 
-type AuditData =
+export type AuditData =
   | CreateAuditData
   | UpdateAuditData
   | DeleteAuditData
-  | AuditMessageData;
+  | AuditCustomData;
 
 export class AuditEntity extends BaseEntity<AuditEntity, 'id'> {
-  id!: string;
+  id!: number;
   user?: UserEntity;
   createdAt!: Date;
   data!: AuditData;
@@ -47,13 +49,13 @@ export const auditSchema = new EntitySchema({
   extends: 'BaseEntity',
   tableName: 'audit',
   properties: {
-    id: { type: 'string', onCreate: () => uuid(), primary: true },
+    id: { type: 'number', primary: true },
     user: {
       reference: 'm:1',
       entity: () => UserEntity,
       nullable: true,
     },
-    createdAt: { type: DateType, onCreate: () => new Date() },
+    createdAt: { type: Date, onCreate: () => new Date() },
     data: { type: JsonType },
   },
 });

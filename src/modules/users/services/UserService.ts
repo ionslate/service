@@ -184,15 +184,20 @@ export class UserService {
       const userSession = await this.findUserSession(userId);
       if (userSession) {
         await this.removeSession(userSession);
-        await this.auditService.addAuditMessage(
-          `logged ${userEntity.username} out`,
-        );
+
+        await this.auditService.addCustomAudit({
+          action: 'logged out',
+          entityName: UserEntity.name,
+          resourceName: userEntity.username,
+        });
       }
 
       if (request.password) {
-        await this.auditService.addAuditMessage(
-          `changed ${userEntity.username}'s password`,
-        );
+        await this.auditService.addCustomAudit({
+          action: 'changed password for',
+          entityName: UserEntity.name,
+          resourceName: userEntity.username,
+        });
       }
     }
 
@@ -262,7 +267,11 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
-    await this.auditService.addAuditMessage(`disabled ${userEntity.username}`);
+    await this.auditService.addCustomAudit({
+      action: 'disabled',
+      entityName: UserEntity.name,
+      resourceName: userEntity.username,
+    });
 
     return userId;
   }
@@ -274,7 +283,11 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
-    await this.auditService.addAuditMessage(`enabled ${userEntity.username}`);
+    await this.auditService.addCustomAudit({
+      action: 'enabled',
+      entityName: UserEntity.name,
+      resourceName: userEntity.username,
+    });
 
     return userId;
   }
@@ -288,9 +301,11 @@ export class UserService {
     if (sid) {
       await this.removeSession(sid);
 
-      await this.auditService.addAuditMessage(
-        `logged ${userEntity.username} out`,
-      );
+      await this.auditService.addCustomAudit({
+        action: 'logged out',
+        entityName: UserEntity.name,
+        resourceName: userEntity.username,
+      });
 
       return userId;
     }
