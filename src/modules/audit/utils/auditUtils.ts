@@ -7,6 +7,10 @@ import {
   auditIsDelete,
 } from '@audit/utils/auditTypeGuards';
 import { buildAuditUpdateFields } from '@audit/utils/buildAuditUpdateFields';
+import isBefore from 'date-fns/isBefore';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import addDays from 'date-fns/addDays';
+import format from 'date-fns/format';
 
 export function getAction(data: AuditData): string {
   if (auditIsCreate(data)) {
@@ -25,20 +29,21 @@ export function getAction(data: AuditData): string {
 }
 
 export function buildAudit(auditEntity: AuditEntity): Audit {
-  const auditData = auditEntity.data;
+  const datePerformed = auditEntity.createdAt;
+  const oneWeekAgo = addDays(new Date(), -7);
 
-  console.log(auditEntity.toJSON());
+  const performedAt = isBefore(oneWeekAgo, datePerformed)
+    ? formatDistanceToNow(datePerformed, { addSuffix: true })
+    : format(datePerformed, 'MM/dd/yyyy');
 
   return {
     id: `${auditEntity.id}`,
     performedBy: auditEntity.user?.username || 'SYSTEM',
-    performedAt: auditEntity.createdAt.toLocaleDateString('en-US', {
-      timeZone: 'UTC',
-    }),
-    action: getAction(auditData),
-    resource: capitalize(auditData.entityName.replace('Entity', '')),
-    resourceName: auditData.resourceName,
-    parentResourceName: auditData.parentResourceName,
+    performedAt,
+    action: getAction(auditEntity.data),
+    resource: capitalize(auditEntity.data.entityName.replace('Entity', '')),
+    resourceName: auditEntity.data.resourceName,
+    parentResourceName: auditEntity.data.parentResourceName,
     auditFields: buildAuditUpdateFields(auditEntity),
   };
 }
