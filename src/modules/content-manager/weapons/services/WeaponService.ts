@@ -122,12 +122,9 @@ export class WeaponService {
     weaponModeId: string,
     request: WeaponModeRequest,
   ): Promise<WeaponModeEntity> {
-    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
-      {
-        id: weaponModeId,
-      },
-      { weapon: true },
-    );
+    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail({
+      id: weaponModeId,
+    });
 
     if (weaponModeEntity.weapon.id !== weaponId) {
       throw new ResourceNotFound('WeaponMode not found');
@@ -135,6 +132,7 @@ export class WeaponService {
 
     await weaponModeEntity.ammo.init();
     await weaponModeEntity.traits.init();
+    await weaponModeEntity.weapon.init();
     const originalWeaponMode = weaponModeEntity.toPOJO();
 
     const ammoEntities = await this.ammoRepository.find({
@@ -183,17 +181,15 @@ export class WeaponService {
     weaponId: string,
     weaponModeId: string,
   ): Promise<string> {
-    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail(
-      {
-        id: weaponModeId,
-      },
-      { weapon: true },
-    );
+    const weaponModeEntity = await this.weaponModeRepository.findOneOrFail({
+      id: weaponModeId,
+    });
 
     if (weaponModeEntity.weapon.id !== weaponId) {
       throw new ResourceNotFound('WeaponMode not found');
     }
 
+    await weaponModeEntity.weapon.init();
     await this.weaponModeRepository.removeAndFlush(weaponModeEntity);
 
     this.auditService.addDeleteAudit({

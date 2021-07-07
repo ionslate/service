@@ -29,6 +29,9 @@ export function createTestContainer(
   const RedisStore = connectRedis(session);
   const sessionStore = new RedisStore({ client: redisClient });
 
+  const auditRepository = options?.auditRepository || jest.fn();
+  const auditService = options?.auditService || jest.fn();
+
   const ruleRepository = options?.ruleRepository || jest.fn();
   const ruleService = options?.ruleService || jest.fn();
 
@@ -88,5 +91,7 @@ export function createTestContainer(
     userRepository,
     userService,
     authService,
+    auditRepository,
+    auditService,
   } as unknown) as Container;
 }

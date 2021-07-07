@@ -19,6 +19,14 @@ let orm: MikroORM;
 let hackingProgramService: HackingProgramService;
 let backup: IBackup;
 
+const auditService = {
+  addCreateAudit: jest.fn(),
+  addCustomAudit: jest.fn(),
+  addDeleteAudit: jest.fn(),
+  addUpdateAudit: jest.fn(),
+  getAuditList: jest.fn(),
+};
+
 beforeAll(async () => {
   db = newDb();
   orm = await db.adapters.createMikroOrm({
@@ -31,7 +39,10 @@ beforeAll(async () => {
   const hackingProgramRepository: EntityRepository<HackingProgramEntity> = orm.em.getRepository(
     HackingProgramEntity,
   );
-  hackingProgramService = new HackingProgramService(hackingProgramRepository);
+  hackingProgramService = new HackingProgramService(
+    hackingProgramRepository,
+    auditService as never,
+  );
   backup = db.backup();
 });
 
@@ -64,6 +75,10 @@ describe('HackingProgramService', () => {
       );
 
       expect(newHackingProgram.toObject()).toEqual(hackingProgramRow);
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: HackingProgramEntity.name,
+        resourceName: newHackingProgram.name,
+      });
     });
   });
 
@@ -107,6 +122,12 @@ describe('HackingProgramService', () => {
       );
 
       expect(updatedHackingProgram.toObject()).toEqual(hackingProgramRow);
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: HackingProgramEntity.name,
+        resourceName: updatedHackingProgram.name,
+        originalValue: hackingProgram,
+        newValue: { ...hackingProgram, name: updatedHackingProgram.name },
+      });
     });
   });
 

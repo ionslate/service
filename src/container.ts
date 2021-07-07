@@ -36,6 +36,7 @@ export type Container = {
   sessionStore: RedisStore;
   entityManager: EntityManager<PostgreSqlDriver>;
   auditService: AuditService;
+  auditRepository: EntityRepository<AuditEntity>;
   ruleRepository: EntityRepository<RuleEntity>;
   ruleService: RuleService;
   ammoRepository: EntityRepository<AmmoEntity>;
@@ -132,6 +133,7 @@ export async function createContainer(): Promise<Container> {
     userService,
     authService,
     auditService,
+    auditRepository,
   };
 }
 

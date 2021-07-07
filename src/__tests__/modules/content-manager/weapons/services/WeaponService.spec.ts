@@ -29,6 +29,14 @@ let orm: MikroORM;
 let weaponService: WeaponService;
 let backup: IBackup;
 
+const auditService = {
+  addCreateAudit: jest.fn(),
+  addCustomAudit: jest.fn(),
+  addDeleteAudit: jest.fn(),
+  addUpdateAudit: jest.fn(),
+  getAuditList: jest.fn(),
+};
+
 beforeAll(async () => {
   db = newDb();
   orm = await db.adapters.createMikroOrm({
@@ -61,6 +69,7 @@ beforeAll(async () => {
     weaponModeRepository,
     ammoRepository,
     ruleRepository,
+    auditService as never,
   );
   backup = db.backup();
 });
@@ -84,6 +93,10 @@ describe('WeaponService', () => {
       );
 
       expect(weaponRow).toEqual(expect.objectContaining(weaponRequest));
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: WeaponEntity.name,
+        resourceName: weapon.name,
+      });
     });
   });
 
@@ -173,6 +186,11 @@ describe('WeaponService', () => {
           ruleEntityId: trait.id,
         }),
       );
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: WeaponModeEntity.name,
+        resourceName: weaponMode.name,
+        parentResourceName: weapon.name,
+      });
     });
   });
 
@@ -201,6 +219,16 @@ describe('WeaponService', () => {
       expect(updatedWeapon.toObject()).toEqual(
         expect.objectContaining(weaponRow),
       );
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: WeaponEntity.name,
+        resourceName: updatedWeapon.name,
+        originalValue: { id: weapon.id, name: weapon.name, link: weapon.link },
+        newValue: {
+          id: weapon.id,
+          name: updatedWeapon.name,
+          link: updatedWeapon.link,
+        },
+      });
     });
   });
 
@@ -228,6 +256,7 @@ describe('WeaponService', () => {
         id: '3456',
         name: 'Suppressive Fire',
         link: null,
+        type: null,
       };
       db.getTable('rule').insert(trait);
       const weaponMode = {
@@ -322,6 +351,39 @@ describe('WeaponService', () => {
           ruleEntityId: trait.id,
         }),
       );
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: WeaponModeEntity.name,
+        resourceName: updatedWeaponMode.name,
+        parentResourceName: weapon.name,
+        originalValue: expect.objectContaining({
+          ammo: [ammo1],
+          burst: weaponMode.burst,
+          damage: weaponMode.damage,
+          id: weaponMode.id,
+          name: weaponMode.name,
+          range: {
+            _8: weaponMode.range__8,
+            _16: weaponMode.range__16,
+            _24: weaponMode.range__24,
+            _32: weaponMode.range__32,
+            _40: weaponMode.range__40,
+            _48: weaponMode.range__48,
+            _96: null,
+          },
+          savingAttribute: weaponMode.saving_attribute,
+          traits: [trait],
+        }),
+        newValue: expect.objectContaining({
+          ammo: [ammo2],
+          burst: updatedWeaponMode.burst,
+          damage: updatedWeaponMode.damage,
+          id: updatedWeaponMode.id,
+          name: updatedWeaponMode.name,
+          range: updatedWeaponMode.range,
+          savingAttribute: updatedWeaponMode.savingAttribute,
+          traits: [trait],
+        }),
+      });
     });
 
     it('should throw if the weapon mode does not exist on the weapon', async () => {
@@ -371,13 +433,14 @@ describe('WeaponService', () => {
         traitIds: [],
       };
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       await weaponService
         .updateWeaponMode(weapon2.id, weaponMode.id, weaponModeRequest)
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
           expect(e.message).toBe('Resource Not Found - WeaponMode not found');
+          expect(auditService.addUpdateAudit).not.toBeCalled();
         });
     });
   });
@@ -562,6 +625,11 @@ describe('WeaponService', () => {
       expect(weaponModeRows.length).toBe(0);
       expect(weaponModeAmmoRows.length).toBe(0);
       expect(weaponModeTraitsRows.length).toBe(0);
+      expect(auditService.addDeleteAudit).toBeCalledWith({
+        entityName: WeaponModeEntity.name,
+        resourceName: weaponMode.name,
+        parentResourceName: weapon.name,
+      });
     });
 
     it('should throw if the weapon mode does not exist on the weapon', async () => {

@@ -19,6 +19,14 @@ let orm: MikroORM;
 let ammoService: AmmoService;
 let backup: IBackup;
 
+const auditService = {
+  addCreateAudit: jest.fn(),
+  addCustomAudit: jest.fn(),
+  addDeleteAudit: jest.fn(),
+  addUpdateAudit: jest.fn(),
+  getAuditList: jest.fn(),
+};
+
 beforeAll(async () => {
   db = newDb();
   orm = await db.adapters.createMikroOrm({
@@ -37,7 +45,7 @@ beforeAll(async () => {
   const ammoRepository: EntityRepository<AmmoEntity> = orm.em.getRepository(
     AmmoEntity,
   );
-  ammoService = new AmmoService(ammoRepository);
+  ammoService = new AmmoService(ammoRepository, auditService as never);
   backup = db.backup();
 });
 
@@ -88,6 +96,10 @@ describe('AmmoService', () => {
           ammo_entity_2_id: ammo2.id,
         }),
       ]);
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: AmmoEntity.name,
+        resourceName: newAmmo.name,
+      });
     });
   });
 
@@ -153,6 +165,22 @@ describe('AmmoService', () => {
           ammo_entity_2_id: ammo3.id,
         }),
       ]);
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: AmmoEntity.name,
+        resourceName: ammo.name,
+        originalValue: {
+          id: '4567',
+          name: 'AP+DA',
+          link: null,
+          combinedAmmo: [ammo1, ammo2],
+        },
+        newValue: {
+          id: '4567',
+          name: 'AP+EXP',
+          link: null,
+          combinedAmmo: [ammo1, ammo3],
+        },
+      });
     });
   });
 
