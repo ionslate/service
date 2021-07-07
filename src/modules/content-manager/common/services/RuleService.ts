@@ -22,6 +22,7 @@ export class RuleService {
 
     await this.auditService.addCreateAudit({
       entityName: RuleEntity.name,
+      resourceId: ruleEntity.id,
       resourceName: ruleEntity.name,
     });
 
@@ -43,6 +44,7 @@ export class RuleService {
 
     await this.auditService.addUpdateAudit({
       entityName: RuleEntity.name,
+      resourceId: ruleEntity.id,
       resourceName: ruleEntity.name,
       originalValue: originalRule,
       newValue: ruleEntity.toPOJO(),

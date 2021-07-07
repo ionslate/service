@@ -77,6 +77,7 @@ describe('HackingProgramService', () => {
       expect(newHackingProgram.toObject()).toEqual(hackingProgramRow);
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: HackingProgramEntity.name,
+        resourceId: newHackingProgram.id,
         resourceName: newHackingProgram.name,
       });
     });
@@ -124,6 +125,7 @@ describe('HackingProgramService', () => {
       expect(updatedHackingProgram.toObject()).toEqual(hackingProgramRow);
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: HackingProgramEntity.name,
+        resourceId: updatedHackingProgram.id,
         resourceName: updatedHackingProgram.name,
         originalValue: hackingProgram,
         newValue: { ...hackingProgram, name: updatedHackingProgram.name },

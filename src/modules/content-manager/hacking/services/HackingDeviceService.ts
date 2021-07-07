@@ -31,6 +31,7 @@ export class HackingDeviceService {
 
     await this.auditService.addCreateAudit({
       entityName: HackingDeviceEntity.name,
+      resourceId: hackingDeviceEntity.id,
       resourceName: hackingDeviceEntity.name,
     });
 
@@ -65,6 +66,7 @@ export class HackingDeviceService {
 
     await this.auditService.addUpdateAudit({
       entityName: HackingDeviceEntity.name,
+      resourceId: hackingDeviceEntity.id,
       resourceName: hackingDeviceEntity.name,
       originalValue: originalHackingDevice,
       newValue: hackingDeviceEntity.toPOJO(),

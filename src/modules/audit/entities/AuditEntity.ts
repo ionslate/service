@@ -42,6 +42,7 @@ export class AuditEntity extends BaseEntity<AuditEntity, 'id'> {
   user?: UserEntity;
   createdAt!: Date;
   data!: AuditData;
+  resourceId!: string;
 }
 
 export const auditSchema = new EntitySchema({
@@ -57,5 +58,6 @@ export const auditSchema = new EntitySchema({
     },
     createdAt: { type: Date, onCreate: () => new Date() },
     data: { type: JsonType },
+    resourceId: { type: 'string' },
   },
 });

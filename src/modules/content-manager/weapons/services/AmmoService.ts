@@ -23,6 +23,7 @@ export class AmmoService {
 
     await this.auditService.addCreateAudit({
       entityName: AmmoEntity.name,
+      resourceId: ammoEntity.id,
       resourceName: ammoEntity.name,
     });
 
@@ -47,6 +48,7 @@ export class AmmoService {
 
     await this.auditService.addUpdateAudit({
       entityName: AmmoEntity.name,
+      resourceId: ammoEntity.id,
       resourceName: originalAmmo.name,
       originalValue: originalAmmo,
       newValue: ammoEntity.toPOJO(),

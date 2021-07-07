@@ -104,6 +104,7 @@ describe('HackingDeviceService', () => {
       );
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: HackingDeviceEntity.name,
+        resourceId: hackingDevice.id,
         resourceName: hackingDevice.name,
       });
     });
@@ -165,6 +166,7 @@ describe('HackingDeviceService', () => {
       );
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: HackingDeviceEntity.name,
+        resourceId: hackingDevice.id,
         resourceName: hackingDevice.name,
         originalValue: {
           id: hackingDeviceId,

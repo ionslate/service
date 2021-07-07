@@ -75,6 +75,7 @@ describe('RuleService', () => {
       );
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: RuleEntity.name,
+        resourceId: newRule.id,
         resourceName: newRule.name,
       });
     });
@@ -104,6 +105,7 @@ describe('RuleService', () => {
       expect(ruleRow).toEqual(expect.objectContaining(updatedRule.toObject()));
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: RuleEntity.name,
+        resourceId: updatedRule.id,
         resourceName: updatedRule.name,
         originalValue: rule,
         newValue: { ...rule, name: updatedRule.name },

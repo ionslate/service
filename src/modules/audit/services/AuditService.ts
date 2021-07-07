@@ -10,12 +10,14 @@ import { buildAudit } from '@audit/utils/auditUtils';
 
 interface CreateAuditArgs {
   entityName: string;
+  resourceId: string;
   resourceName: string;
   parentResourceName?: string;
 }
 
 interface DeleteAuditArgs {
   entityName: string;
+  resourceId: string;
   resourceName: string;
   parentResourceName?: string;
 }
@@ -23,6 +25,7 @@ interface DeleteAuditArgs {
 interface UpdateAuditArgs {
   entityName: string;
   resourceName: string;
+  resourceId: string;
   parentResourceName?: string;
   originalValue: Record<string, unknown>;
   newValue: Record<string, unknown>;
@@ -31,6 +34,7 @@ interface UpdateAuditArgs {
 interface CustomAuditArgs {
   action: string;
   entityName: string;
+  resourceId: string;
   resourceName: string;
   parentResourceName?: string;
 }
@@ -43,6 +47,7 @@ export class AuditService {
 
   async addCreateAudit({
     entityName,
+    resourceId,
     resourceName,
     parentResourceName,
   }: CreateAuditArgs): Promise<void> {
@@ -54,6 +59,7 @@ export class AuditService {
       data: {
         type: 'CREATE',
         entityName,
+        resourceId,
         resourceName,
         parentResourceName,
       },
@@ -64,6 +70,7 @@ export class AuditService {
 
   async addUpdateAudit({
     entityName,
+    resourceId,
     resourceName,
     parentResourceName,
     originalValue,
@@ -81,6 +88,7 @@ export class AuditService {
         data: {
           type: 'UPDATE',
           entityName,
+          resourceId,
           resourceName,
           parentResourceName,
           diff: [originalDiff, newDiff],
@@ -93,6 +101,7 @@ export class AuditService {
 
   async addDeleteAudit({
     entityName,
+    resourceId,
     resourceName,
     parentResourceName,
   }: DeleteAuditArgs): Promise<void> {
@@ -104,6 +113,7 @@ export class AuditService {
       data: {
         type: 'DELETE',
         entityName,
+        resourceId,
         resourceName,
         parentResourceName,
       },
@@ -115,6 +125,7 @@ export class AuditService {
   async addCustomAudit({
     action,
     entityName,
+    resourceId,
     resourceName,
     parentResourceName,
   }: CustomAuditArgs): Promise<void> {
@@ -127,6 +138,7 @@ export class AuditService {
         type: 'CUSTOM',
         action,
         entityName,
+        resourceId,
         resourceName,
         parentResourceName,
       },

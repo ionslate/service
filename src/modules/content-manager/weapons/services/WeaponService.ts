@@ -33,6 +33,7 @@ export class WeaponService {
 
     await this.auditService.addCreateAudit({
       entityName: WeaponEntity.name,
+      resourceId: weaponEntity.id,
       resourceName: weaponEntity.name,
     });
 
@@ -84,6 +85,7 @@ export class WeaponService {
 
     await this.auditService.addCreateAudit({
       entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponEntity.name,
     });
@@ -109,6 +111,7 @@ export class WeaponService {
 
     await this.auditService.addUpdateAudit({
       entityName: WeaponEntity.name,
+      resourceId: weaponEntity.id,
       resourceName: weaponEntity.name,
       originalValue: originalWeapon,
       newValue: weaponEntity.toPOJO(),
@@ -168,6 +171,7 @@ export class WeaponService {
 
     await this.auditService.addUpdateAudit({
       entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponModeEntity.weapon.name,
       originalValue: originalWeaponMode,
@@ -194,6 +198,7 @@ export class WeaponService {
 
     this.auditService.addDeleteAudit({
       entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponModeEntity.weapon.name,
     });

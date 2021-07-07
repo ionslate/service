@@ -98,6 +98,7 @@ export class UserService {
 
     await this.auditService.addCreateAudit({
       entityName: UserEntity.name,
+      resourceId: userEntity.id,
       resourceName: userEntity.username,
     });
 
@@ -173,6 +174,7 @@ export class UserService {
 
     await this.auditService.addUpdateAudit({
       entityName: UserEntity.name,
+      resourceId: userEntity.id,
       resourceName: userEntity.username,
       originalValue: originalUser,
       newValue: userEntity.toPOJO(),
@@ -188,6 +190,7 @@ export class UserService {
         await this.auditService.addCustomAudit({
           action: 'logged out',
           entityName: UserEntity.name,
+          resourceId: userEntity.id,
           resourceName: userEntity.username,
         });
       }
@@ -196,6 +199,7 @@ export class UserService {
         await this.auditService.addCustomAudit({
           action: 'changed password for',
           entityName: UserEntity.name,
+          resourceId: userEntity.id,
           resourceName: userEntity.username,
         });
       }
@@ -249,6 +253,7 @@ export class UserService {
 
     await this.auditService.addDeleteAudit({
       entityName: UserEntity.name,
+      resourceId: userEntity.id,
       resourceName: userEntity.username,
     });
 
@@ -270,6 +275,7 @@ export class UserService {
     await this.auditService.addCustomAudit({
       action: 'disabled',
       entityName: UserEntity.name,
+      resourceId: userEntity.id,
       resourceName: userEntity.username,
     });
 
@@ -286,6 +292,7 @@ export class UserService {
     await this.auditService.addCustomAudit({
       action: 'enabled',
       entityName: UserEntity.name,
+      resourceId: userEntity.id,
       resourceName: userEntity.username,
     });
 
@@ -304,6 +311,7 @@ export class UserService {
       await this.auditService.addCustomAudit({
         action: 'logged out',
         entityName: UserEntity.name,
+        resourceId: userEntity.id,
         resourceName: userEntity.username,
       });
 

@@ -98,6 +98,7 @@ describe('AmmoService', () => {
       ]);
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: AmmoEntity.name,
+        resourceId: newAmmo.id,
         resourceName: newAmmo.name,
       });
     });
@@ -167,6 +168,7 @@ describe('AmmoService', () => {
       ]);
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: AmmoEntity.name,
+        resourceId: ammo.id,
         resourceName: ammo.name,
         originalValue: {
           id: '4567',

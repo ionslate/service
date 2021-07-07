@@ -95,6 +95,7 @@ describe('WeaponService', () => {
       expect(weaponRow).toEqual(expect.objectContaining(weaponRequest));
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: WeaponEntity.name,
+        resourceId: weapon.id,
         resourceName: weapon.name,
       });
     });
@@ -188,6 +189,7 @@ describe('WeaponService', () => {
       );
       expect(auditService.addCreateAudit).toBeCalledWith({
         entityName: WeaponModeEntity.name,
+        resourceId: weaponMode.id,
         resourceName: weaponMode.name,
         parentResourceName: weapon.name,
       });
@@ -221,6 +223,7 @@ describe('WeaponService', () => {
       );
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: WeaponEntity.name,
+        resourceId: updatedWeapon.id,
         resourceName: updatedWeapon.name,
         originalValue: { id: weapon.id, name: weapon.name, link: weapon.link },
         newValue: {
@@ -353,6 +356,7 @@ describe('WeaponService', () => {
       );
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: WeaponModeEntity.name,
+        resourceId: updatedWeaponMode.id,
         resourceName: updatedWeaponMode.name,
         parentResourceName: weapon.name,
         originalValue: expect.objectContaining({
@@ -627,6 +631,7 @@ describe('WeaponService', () => {
       expect(weaponModeTraitsRows.length).toBe(0);
       expect(auditService.addDeleteAudit).toBeCalledWith({
         entityName: WeaponModeEntity.name,
+        resourceId: weaponMode.id,
         resourceName: weaponMode.name,
         parentResourceName: weapon.name,
       });
@@ -683,13 +688,14 @@ describe('WeaponService', () => {
         rule_entity_id: trait.id,
       });
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       await weaponService
         .removeWeaponMode(weapon2.id, weaponMode.id)
         .catch((e: Error) => {
           expect(e).toBeInstanceOf(ResourceNotFound);
           expect(e.message).toBe('Resource Not Found - WeaponMode not found');
+          expect(auditService.addDeleteAudit).not.toBeCalled();
         });
     });
   });
