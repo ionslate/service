@@ -56,10 +56,10 @@ export class AuditService {
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
+      resourceId,
       data: {
         type: 'CREATE',
         entityName,
-        resourceId,
         resourceName,
         parentResourceName,
       },
@@ -85,10 +85,10 @@ export class AuditService {
 
       const auditEntity = this.auditRepository.create({
         user: userEntity,
+        resourceId,
         data: {
           type: 'UPDATE',
           entityName,
-          resourceId,
           resourceName,
           parentResourceName,
           diff: [originalDiff, newDiff],
@@ -110,10 +110,10 @@ export class AuditService {
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
+      resourceId,
       data: {
         type: 'DELETE',
         entityName,
-        resourceId,
         resourceName,
         parentResourceName,
       },

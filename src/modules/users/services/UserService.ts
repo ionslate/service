@@ -96,13 +96,13 @@ export class UserService {
       );
     }
 
+    await this.userRepository.persistAndFlush(userEntity);
+
     await this.auditService.addCreateAudit({
       entityName: UserEntity.name,
       resourceId: userEntity.id,
       resourceName: userEntity.username,
     });
-
-    await this.userRepository.persistAndFlush(userEntity);
 
     return userEntity;
   }
