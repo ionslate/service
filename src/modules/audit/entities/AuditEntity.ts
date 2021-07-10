@@ -6,6 +6,7 @@ export interface CreateAuditData {
   entityName: string;
   parentResourceName?: string;
   resourceName: string;
+  data: Record<string, unknown>;
 }
 
 export interface UpdateAuditData {

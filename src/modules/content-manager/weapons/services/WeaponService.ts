@@ -35,6 +35,7 @@ export class WeaponService {
       entityName: WeaponEntity.name,
       resourceId: weaponEntity.id,
       resourceName: weaponEntity.name,
+      data: weaponEntity.toPOJO(),
     });
 
     return weaponEntity;
@@ -88,6 +89,7 @@ export class WeaponService {
       resourceId: weaponModeEntity.id,
       resourceName: weaponModeEntity.name,
       parentResourceName: weaponEntity.name,
+      data: weaponModeEntity.toPOJO(),
     });
 
     return weaponModeEntity;
@@ -112,7 +114,7 @@ export class WeaponService {
     await this.auditService.addUpdateAudit({
       entityName: WeaponEntity.name,
       resourceId: weaponEntity.id,
-      resourceName: weaponEntity.name,
+      resourceName: originalWeapon.name,
       originalValue: originalWeapon,
       newValue: weaponEntity.toPOJO(),
     });
@@ -172,7 +174,7 @@ export class WeaponService {
     await this.auditService.addUpdateAudit({
       entityName: WeaponModeEntity.name,
       resourceId: weaponModeEntity.id,
-      resourceName: weaponModeEntity.name,
+      resourceName: originalWeaponMode.name,
       parentResourceName: weaponModeEntity.weapon.name,
       originalValue: originalWeaponMode,
       newValue: weaponModeEntity.toPOJO(),

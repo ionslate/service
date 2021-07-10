@@ -13,6 +13,7 @@ interface CreateAuditArgs {
   resourceId: string;
   resourceName: string;
   parentResourceName?: string;
+  data: Record<string, unknown>;
 }
 
 interface DeleteAuditArgs {
@@ -50,6 +51,7 @@ export class AuditService {
     resourceId,
     resourceName,
     parentResourceName,
+    data,
   }: CreateAuditArgs): Promise<void> {
     const { user } = getAppContext();
     const userEntity = await this.userRepository.findOne({ id: user?.id });
@@ -62,6 +64,7 @@ export class AuditService {
         entityName,
         resourceName,
         parentResourceName,
+        data,
       },
     });
 

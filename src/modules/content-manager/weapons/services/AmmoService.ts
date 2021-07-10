@@ -25,6 +25,7 @@ export class AmmoService {
       entityName: AmmoEntity.name,
       resourceId: ammoEntity.id,
       resourceName: ammoEntity.name,
+      data: ammoEntity.toPOJO(),
     });
 
     return ammoEntity;

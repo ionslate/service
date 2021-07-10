@@ -100,6 +100,12 @@ describe('AmmoService', () => {
         entityName: AmmoEntity.name,
         resourceId: newAmmo.id,
         resourceName: newAmmo.name,
+        data: {
+          id: expect.any(String),
+          name: newAmmo.name,
+          link: newAmmo.link,
+          combinedAmmo: [ammo1, ammo2],
+        },
       });
     });
   });

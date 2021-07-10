@@ -97,6 +97,11 @@ describe('WeaponService', () => {
         entityName: WeaponEntity.name,
         resourceId: weapon.id,
         resourceName: weapon.name,
+        data: {
+          id: expect.any(String),
+          name: weapon.name,
+          link: weapon.link,
+        },
       });
     });
   });
@@ -192,6 +197,24 @@ describe('WeaponService', () => {
         resourceId: weaponMode.id,
         resourceName: weaponMode.name,
         parentResourceName: weapon.name,
+        data: {
+          id: expect.any(String),
+          name: weaponMode.name,
+          burst: weaponMode.burst,
+          damage: weaponMode.damage,
+          savingAttribute: weaponMode.savingAttribute,
+          range: {
+            _8: weaponMode.range._8,
+            _16: weaponMode.range._16,
+            _24: weaponMode.range._24,
+            _32: weaponMode.range._32,
+            _40: weaponMode.range._40,
+            _48: weaponMode.range._48,
+            _96: weaponMode.range._96,
+          },
+          traits: [{ ...trait, type: null }],
+          ammo: [ammo],
+        },
       });
     });
   });
@@ -224,7 +247,7 @@ describe('WeaponService', () => {
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: WeaponEntity.name,
         resourceId: updatedWeapon.id,
-        resourceName: updatedWeapon.name,
+        resourceName: weapon.name,
         originalValue: { id: weapon.id, name: weapon.name, link: weapon.link },
         newValue: {
           id: weapon.id,
@@ -357,7 +380,7 @@ describe('WeaponService', () => {
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: WeaponModeEntity.name,
         resourceId: updatedWeaponMode.id,
-        resourceName: updatedWeaponMode.name,
+        resourceName: weaponMode.name,
         parentResourceName: weapon.name,
         originalValue: expect.objectContaining({
           ammo: [ammo1],

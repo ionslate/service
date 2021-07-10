@@ -24,6 +24,7 @@ export class RuleService {
       entityName: RuleEntity.name,
       resourceId: ruleEntity.id,
       resourceName: ruleEntity.name,
+      data: ruleEntity.toPOJO(),
     });
 
     return ruleEntity;
@@ -45,7 +46,7 @@ export class RuleService {
     await this.auditService.addUpdateAudit({
       entityName: RuleEntity.name,
       resourceId: ruleEntity.id,
-      resourceName: ruleEntity.name,
+      resourceName: originalRule.name,
       originalValue: originalRule,
       newValue: ruleEntity.toPOJO(),
     });

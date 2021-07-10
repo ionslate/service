@@ -77,6 +77,12 @@ describe('RuleService', () => {
         entityName: RuleEntity.name,
         resourceId: newRule.id,
         resourceName: newRule.name,
+        data: {
+          id: expect.any(String),
+          name: newRule.name,
+          link: newRule.link,
+          type: newRule.type,
+        },
       });
     });
   });
@@ -106,7 +112,7 @@ describe('RuleService', () => {
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: RuleEntity.name,
         resourceId: updatedRule.id,
-        resourceName: updatedRule.name,
+        resourceName: rule.name,
         originalValue: rule,
         newValue: { ...rule, name: updatedRule.name },
       });

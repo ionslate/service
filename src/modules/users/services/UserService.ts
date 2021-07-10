@@ -102,6 +102,7 @@ export class UserService {
       entityName: UserEntity.name,
       resourceId: userEntity.id,
       resourceName: userEntity.username,
+      data: userEntity.toPOJO(),
     });
 
     return userEntity;
@@ -175,7 +176,7 @@ export class UserService {
     await this.auditService.addUpdateAudit({
       entityName: UserEntity.name,
       resourceId: userEntity.id,
-      resourceName: userEntity.username,
+      resourceName: originalUser.username,
       originalValue: originalUser,
       newValue: userEntity.toPOJO(),
     });

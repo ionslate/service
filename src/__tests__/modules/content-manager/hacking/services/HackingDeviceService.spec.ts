@@ -106,6 +106,12 @@ describe('HackingDeviceService', () => {
         entityName: HackingDeviceEntity.name,
         resourceId: hackingDevice.id,
         resourceName: hackingDevice.name,
+        data: {
+          id: expect.any(String),
+          name: hackingDevice.name,
+          link: null,
+          programs: [hackingProgram],
+        },
       });
     });
   });
@@ -167,7 +173,7 @@ describe('HackingDeviceService', () => {
       expect(auditService.addUpdateAudit).toBeCalledWith({
         entityName: HackingDeviceEntity.name,
         resourceId: hackingDevice.id,
-        resourceName: hackingDevice.name,
+        resourceName: 'Hacking Device',
         originalValue: {
           id: hackingDeviceId,
           link: null,

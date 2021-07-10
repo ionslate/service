@@ -11,6 +11,7 @@ import isBefore from 'date-fns/isBefore';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import addDays from 'date-fns/addDays';
 import format from 'date-fns/format';
+import { buildAuditCreateFields } from './buildAuditCreateFields';
 
 export function getAction(data: AuditData): string {
   if (auditIsCreate(data)) {
@@ -44,6 +45,11 @@ export function buildAudit(auditEntity: AuditEntity): Audit {
     resource: capitalize(auditEntity.data.entityName.replace('Entity', '')),
     resourceName: auditEntity.data.resourceName,
     parentResourceName: auditEntity.data.parentResourceName,
-    auditFields: buildAuditUpdateFields(auditEntity),
+    auditFields:
+      auditEntity.data.type === 'UPDATE'
+        ? buildAuditUpdateFields(auditEntity)
+        : auditEntity.data.type === 'CREATE'
+        ? buildAuditCreateFields(auditEntity)
+        : null,
   };
 }
