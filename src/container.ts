@@ -26,13 +26,17 @@ import config from '@config/config';
 import { Request, Response } from 'express-serve-static-core';
 import session from 'express-session';
 import RedisClient, { Redis } from 'ioredis';
-import { RateLimiter } from './modules/service/RateLimiter';
+import { RateLimiter } from '@common/service/RateLimiter';
+import { AuditService } from '@audit/services/AuditService';
+import { AuditEntity } from '@audit/entities/AuditEntity';
 
 export type Container = {
   orm: MikroORM<PostgreSqlDriver>;
   redisClient: Redis;
   sessionStore: RedisStore;
   entityManager: EntityManager<PostgreSqlDriver>;
+  auditService: AuditService;
+  auditRepository: EntityRepository<AuditEntity>;
   ruleRepository: EntityRepository<RuleEntity>;
   ruleService: RuleService;
   ammoRepository: EntityRepository<AmmoEntity>;
@@ -66,36 +70,45 @@ export async function createContainer(): Promise<Container> {
   const sessionStore = new RedisStore({ client: redisClient });
 
   const ruleRepository = orm.em.getRepository(RuleEntity);
-  const ruleService = new RuleService(ruleRepository);
-
   const ammoRepository = orm.em.getRepository(AmmoEntity);
-  const ammoService = new AmmoService(ammoRepository);
-  const ammoLoader = new AmmoLoader(ammoService);
-
   const hackingProgramRepository = orm.em.getRepository(HackingProgramEntity);
+  const hackingDeviceRepository = orm.em.getRepository(HackingDeviceEntity);
+  const weaponRepository = orm.em.getRepository(WeaponEntity);
+  const weaponModeRepository = orm.em.getRepository(WeaponModeEntity);
+  const userRepository = orm.em.getRepository(UserEntity);
+  const auditRepository = orm.em.getRepository(AuditEntity);
+
+  const auditService = new AuditService(auditRepository, userRepository);
+
+  const ruleService = new RuleService(ruleRepository, auditService);
+  const ammoService = new AmmoService(ammoRepository, auditService);
   const hackingProgramService = new HackingProgramService(
     hackingProgramRepository,
+    auditService,
   );
-  const hackingDeviceRepository = orm.em.getRepository(HackingDeviceEntity);
   const hackingDeviceService = new HackingDeviceService(
     hackingDeviceRepository,
     hackingProgramRepository,
+    auditService,
   );
-  const hackingProgramLoader = new HackingProgramLoader(hackingProgramService);
-
-  const weaponRepository = orm.em.getRepository(WeaponEntity);
-  const weaponModeRepository = orm.em.getRepository(WeaponModeEntity);
   const weaponService = new WeaponService(
     weaponRepository,
     weaponModeRepository,
     ammoRepository,
     ruleRepository,
+    auditService,
   );
-  const weaponLoader = new WeaponLoader(weaponService);
-
-  const userRepository = orm.em.getRepository(UserEntity);
-  const userService = new UserService(userRepository, sessionStore, orm.em);
+  const userService = new UserService(
+    userRepository,
+    sessionStore,
+    orm.em,
+    auditService,
+  );
   const authService = new AuthService(userRepository);
+
+  const ammoLoader = new AmmoLoader(ammoService);
+  const hackingProgramLoader = new HackingProgramLoader(hackingProgramService);
+  const weaponLoader = new WeaponLoader(weaponService);
 
   return {
     orm,
@@ -119,12 +132,15 @@ export async function createContainer(): Promise<Container> {
     userRepository,
     userService,
     authService,
+    auditService,
+    auditRepository,
   };
 }
 
 export type AppContext = {
   ruleService: RuleService;
   ammoService: AmmoService;
+  auditService: AuditService;
   combinedAmmoLoader: Dataloader<string, AmmoEntity[], string>;
   hackingProgramService: HackingProgramService;
   hackingDeviceService: HackingDeviceService;
@@ -149,6 +165,7 @@ export const createContext = (
     rateLimiter: new RateLimiter(container.redisClient, req, res),
     ruleService: container.ruleService,
     ammoService: container.ammoService,
+    auditService: container.auditService,
     combinedAmmoLoader: container.ammoLoader.createCombinedAmmoLoader(),
     hackingProgramService: container.hackingProgramService,
     hackingDeviceService: container.hackingDeviceService,

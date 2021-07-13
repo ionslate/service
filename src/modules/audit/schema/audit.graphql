@@ -1,0 +1,30 @@
+type Audit {
+  id: ID!
+  performedBy: String!
+  performedAt: String!
+  action: String!
+  resource: String!
+  resourceName: String!
+  parentResourceName: String
+  auditFields: [AuditField!]
+  
+}
+
+type AuditField {
+  fieldName: String!
+  oldValue: String
+  newValue: String
+  childFields: [AuditField!]
+}
+
+type PagedAudit {
+  content: [Audit!]!
+  limit: Int
+  count: Int!
+  page: Int!
+  last: Boolean!
+}
+
+extend type Query {
+  auditList(page: Int, limit: Int): PagedAudit! @auth(requires: USER_ADMIN)
+}

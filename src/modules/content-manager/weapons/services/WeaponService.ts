@@ -12,6 +12,7 @@ import {
   WeaponRequest,
 } from '@root/__generatedTypes__';
 import groupBy from 'lodash/groupBy';
+import { AuditService } from '@audit/services/AuditService';
 
 export class WeaponService {
   constructor(
@@ -19,17 +20,25 @@ export class WeaponService {
     private weaponModeRepository: EntityRepository<WeaponModeEntity>,
     private ammoRepository: EntityRepository<AmmoEntity>,
     private ruleRepository: EntityRepository<RuleEntity>,
+    private auditService: AuditService,
   ) {}
 
   async createWeapon(request: WeaponRequest): Promise<WeaponEntity> {
-    const WeaponEntity = this.weaponRepository.create({
+    const weaponEntity = this.weaponRepository.create({
       name: request.name,
       link: request.link,
     });
 
-    await this.weaponRepository.persistAndFlush(WeaponEntity);
+    await this.weaponRepository.persistAndFlush(weaponEntity);
 
-    return WeaponEntity;
+    await this.auditService.addCreateAudit({
+      entityName: WeaponEntity.name,
+      resourceId: weaponEntity.id,
+      resourceName: weaponEntity.name,
+      data: weaponEntity.toPOJO(),
+    });
+
+    return weaponEntity;
   }
 
   async createWeaponMode(
@@ -75,6 +84,14 @@ export class WeaponService {
 
     await this.weaponRepository.persistAndFlush(weaponModeEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
+      resourceName: weaponModeEntity.name,
+      parentResourceName: weaponEntity.name,
+      data: weaponModeEntity.toPOJO(),
+    });
+
     return weaponModeEntity;
   }
 
@@ -85,6 +102,7 @@ export class WeaponService {
     const weaponEntity = await this.weaponRepository.findOneOrFail({
       id: weaponId,
     });
+    const originalWeapon = weaponEntity.toPOJO();
 
     weaponEntity.assign({
       name: request.name,
@@ -92,6 +110,14 @@ export class WeaponService {
     });
 
     await this.weaponRepository.persistAndFlush(weaponEntity);
+
+    await this.auditService.addUpdateAudit({
+      entityName: WeaponEntity.name,
+      resourceId: weaponEntity.id,
+      resourceName: originalWeapon.name,
+      originalValue: originalWeapon,
+      newValue: weaponEntity.toPOJO(),
+    });
 
     return weaponEntity;
   }
@@ -109,6 +135,11 @@ export class WeaponService {
       throw new ResourceNotFound('WeaponMode not found');
     }
 
+    await weaponModeEntity.ammo.init();
+    await weaponModeEntity.traits.init();
+    await weaponModeEntity.weapon.init();
+    const originalWeaponMode = weaponModeEntity.toPOJO();
+
     const ammoEntities = await this.ammoRepository.find({
       id: { $in: request.ammoIds },
     });
@@ -117,10 +148,7 @@ export class WeaponService {
       { orderBy: { name: QueryOrder.ASC } },
     );
 
-    await weaponModeEntity.ammo.init();
     weaponModeEntity.ammo.removeAll();
-
-    await weaponModeEntity.traits.init();
     weaponModeEntity.traits.removeAll();
 
     weaponModeEntity.assign({
@@ -143,6 +171,15 @@ export class WeaponService {
 
     await this.weaponModeRepository.persistAndFlush(weaponModeEntity);
 
+    await this.auditService.addUpdateAudit({
+      entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
+      resourceName: originalWeaponMode.name,
+      parentResourceName: weaponModeEntity.weapon.name,
+      originalValue: originalWeaponMode,
+      newValue: weaponModeEntity.toPOJO(),
+    });
+
     return weaponModeEntity;
   }
 
@@ -158,7 +195,15 @@ export class WeaponService {
       throw new ResourceNotFound('WeaponMode not found');
     }
 
+    await weaponModeEntity.weapon.init();
     await this.weaponModeRepository.removeAndFlush(weaponModeEntity);
+
+    this.auditService.addDeleteAudit({
+      entityName: WeaponModeEntity.name,
+      resourceId: weaponModeEntity.id,
+      resourceName: weaponModeEntity.name,
+      parentResourceName: weaponModeEntity.weapon.name,
+    });
 
     return weaponModeId;
   }

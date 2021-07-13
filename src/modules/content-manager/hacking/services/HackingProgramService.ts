@@ -3,10 +3,12 @@ import { LoadStrategy, QueryOrder } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import { HackingProgramRequest, Search } from '@root/__generatedTypes__';
+import { AuditService } from '@audit/services/AuditService';
 
 export class HackingProgramService {
   constructor(
     private hackingProgramRepository: EntityRepository<HackingProgramEntity>,
+    private auditService: AuditService,
   ) {}
 
   async createHackingProgram(
@@ -26,6 +28,13 @@ export class HackingProgramService {
 
     await this.hackingProgramRepository.persistAndFlush(hackingProgramEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: HackingProgramEntity.name,
+      resourceId: hackingProgramEntity.id,
+      resourceName: hackingProgramEntity.name,
+      data: hackingProgramEntity.toPOJO(),
+    });
+
     return hackingProgramEntity;
   }
 
@@ -36,6 +45,7 @@ export class HackingProgramService {
     const hackingProgramEntity = await this.hackingProgramRepository.findOneOrFail(
       { id: hackingDeviceId },
     );
+    const originalHackingProgram = hackingProgramEntity.toPOJO();
 
     hackingProgramEntity.assign({
       name: request.name,
@@ -50,6 +60,14 @@ export class HackingProgramService {
     });
 
     await this.hackingProgramRepository.persistAndFlush(hackingProgramEntity);
+
+    await this.auditService.addUpdateAudit({
+      entityName: HackingProgramEntity.name,
+      resourceId: hackingProgramEntity.id,
+      resourceName: originalHackingProgram.name,
+      originalValue: originalHackingProgram,
+      newValue: hackingProgramEntity.toPOJO(),
+    });
 
     return hackingProgramEntity;
   }

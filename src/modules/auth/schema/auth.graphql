@@ -15,8 +15,6 @@ input LoginRequest {
 }
 
 extend type Mutation {
-  resetPasswordRequest(email: String!): Boolean
-  resetPassword(resetId: String!, password: String!): User!
   login(request: LoginRequest!): User!
   logout: Boolean
 }

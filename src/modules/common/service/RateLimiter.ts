@@ -1,6 +1,6 @@
 import { Request, Response } from 'express-serve-static-core';
 import { Redis } from 'ioredis';
-import { TooManyRequest } from '../../error/exceptions/TooManyRequests';
+import { TooManyRequest } from '../../../error/exceptions/TooManyRequests';
 
 export class RateLimiter {
   constructor(

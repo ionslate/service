@@ -22,6 +22,14 @@ let orm: MikroORM;
 let hackingDeviceService: HackingDeviceService;
 let backup: IBackup;
 
+const auditService = {
+  addCreateAudit: jest.fn(),
+  addCustomAudit: jest.fn(),
+  addDeleteAudit: jest.fn(),
+  addUpdateAudit: jest.fn(),
+  getAuditList: jest.fn(),
+};
+
 beforeAll(async () => {
   db = newDb();
   orm = await db.adapters.createMikroOrm({
@@ -40,6 +48,7 @@ beforeAll(async () => {
   hackingDeviceService = new HackingDeviceService(
     hackingDeviceRepository,
     hackingProgramRepository,
+    auditService as never,
   );
   backup = db.backup();
 });
@@ -93,6 +102,17 @@ describe('HackingDeviceService', () => {
           hacking_program_entity_id: hackingProgram.id,
         }),
       );
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: HackingDeviceEntity.name,
+        resourceId: hackingDevice.id,
+        resourceName: hackingDevice.name,
+        data: {
+          id: expect.any(String),
+          name: hackingDevice.name,
+          link: null,
+          programs: [hackingProgram],
+        },
+      });
     });
   });
 
@@ -150,6 +170,23 @@ describe('HackingDeviceService', () => {
           hacking_program_entity_id: hackingProgram.id,
         }),
       );
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: HackingDeviceEntity.name,
+        resourceId: hackingDevice.id,
+        resourceName: 'Hacking Device',
+        originalValue: {
+          id: hackingDeviceId,
+          link: null,
+          name: 'Hacking Device',
+          programs: [],
+        },
+        newValue: {
+          id: hackingDeviceId,
+          link: null,
+          name: 'Killer Hacking Device',
+          programs: [hackingProgram],
+        },
+      });
     });
   });
 

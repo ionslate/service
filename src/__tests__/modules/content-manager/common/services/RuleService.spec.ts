@@ -18,6 +18,14 @@ let orm: MikroORM;
 let ruleService: RuleService;
 let backup: IBackup;
 
+const auditService = {
+  addCreateAudit: jest.fn(),
+  addCustomAudit: jest.fn(),
+  addDeleteAudit: jest.fn(),
+  addUpdateAudit: jest.fn(),
+  getAuditList: jest.fn(),
+};
+
 beforeAll(async () => {
   db = newDb();
 
@@ -36,7 +44,7 @@ beforeAll(async () => {
   const ruleRepository: EntityRepository<RuleEntity> = orm.em.getRepository(
     RuleEntity,
   );
-  ruleService = new RuleService(ruleRepository);
+  ruleService = new RuleService(ruleRepository, auditService as never);
   backup = db.backup();
 });
 
@@ -65,6 +73,17 @@ describe('RuleService', () => {
           type: 'MOTORCYCLE',
         }),
       );
+      expect(auditService.addCreateAudit).toBeCalledWith({
+        entityName: RuleEntity.name,
+        resourceId: newRule.id,
+        resourceName: newRule.name,
+        data: {
+          id: expect.any(String),
+          name: newRule.name,
+          link: newRule.link,
+          type: newRule.type,
+        },
+      });
     });
   });
 
@@ -90,6 +109,13 @@ describe('RuleService', () => {
       );
 
       expect(ruleRow).toEqual(expect.objectContaining(updatedRule.toObject()));
+      expect(auditService.addUpdateAudit).toBeCalledWith({
+        entityName: RuleEntity.name,
+        resourceId: updatedRule.id,
+        resourceName: rule.name,
+        originalValue: rule,
+        newValue: { ...rule, name: updatedRule.name },
+      });
     });
   });
 

@@ -16,6 +16,7 @@ import session, { SessionOptions } from 'express-session';
 import morgan from 'morgan';
 import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
+import appContext, { setAppContext } from './appContext';
 
 async function app(container: Container): Promise<Express> {
   const app = express();
@@ -67,6 +68,13 @@ async function app(container: Container): Promise<Express> {
 
   app.use((_, __, next) => {
     RequestContext.create(container.entityManager, next);
+  });
+
+  app.use((req, _, next) => {
+    appContext.run(new Map(), () => {
+      setAppContext({ user: req.session.user });
+      next();
+    });
   });
 
   const typeDefs = await parseSchema();

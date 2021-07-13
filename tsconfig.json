@@ -20,6 +20,8 @@
       "@content-manager/*": ["modules/content-manager/*"],
       "@users/*": ["modules/users/*"],
       "@auth/*": ["modules/auth/*"],
+      "@audit/*": ["modules/audit/*"],
+      "@common/*": ["modules/common/*"],
       "@config/*": ["config/*"],
       "@error/*": ["error/*"],
       "@logger/*": ["logger/*"],

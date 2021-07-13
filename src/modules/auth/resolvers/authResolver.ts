@@ -2,26 +2,6 @@ import { Resolvers, MutationResolvers, User } from '@root/__generatedTypes__';
 
 const FIVE_MINUTES_IN_SECONDS = 300;
 
-const resetPasswordRequest: MutationResolvers['resetPasswordRequest'] = async (
-  _,
-  { email },
-  { authService },
-) => {
-  await authService.resetPasswordRequest(email);
-
-  return null;
-};
-
-const resetPassword: MutationResolvers['resetPassword'] = async (
-  _,
-  { resetId, password },
-  { authService },
-) => {
-  const userEntity = await authService.resetPassword(resetId, password);
-
-  return userEntity as never;
-};
-
 const login: MutationResolvers['login'] = async (
   _,
   { request },
@@ -64,8 +44,6 @@ const logout: MutationResolvers['logout'] = async (_, __, { req, res }) => {
 
 export default {
   Mutation: {
-    resetPasswordRequest,
-    resetPassword,
     login,
     logout,
   },

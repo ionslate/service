@@ -16,7 +16,6 @@ type PagedUsers {
 
 input UserRequest {
   username: String!
-  password: String
   email: String!
 }
 
@@ -47,8 +46,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  createUser(request: UserRequest!): User!
+  createUser(request: UserRequest!): Boolean
   adminCreateUser(request: UserAdminRequest!): User! @auth(requires: USER_ADMIN)
+  resetPasswordRequest(email: String!): Boolean
+  resetPassword(resetId: String!, password: String!): User!
   changePassword(request: ChangePasswordRequest!): Boolean @auth
   updateUser(userId: ID!, request: UserAdminRequest!, logUserOut: Boolean = false): User @auth(requires: USER_ADMIN)
   removeUser(userId: ID!): ID @auth(requires: USER_ADMIN)

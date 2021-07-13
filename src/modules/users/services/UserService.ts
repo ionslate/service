@@ -1,3 +1,5 @@
+import { BadRequest } from '@error/exceptions/BadRequest';
+import { NotAuthorized } from '@error/exceptions/NotAuthorized';
 import { QueryOrder } from '@mikro-orm/core';
 import {
   EntityManager,
@@ -13,21 +15,23 @@ import {
   UserSearch,
 } from '@root/__generatedTypes__';
 import { UserEntity } from '@users/entities/UserEntity';
+import changePasswordRequestSchema from '@users/validation/changePasswordRequestSchema';
+import resetPasswordRequestSchema from '@users/validation/resetPasswordRequestSchema';
+import resetPasswordSchema from '@users/validation/resetPasswordSchema';
+import userAdminRequestSchema from '@users/validation/userAdminRequestSchema';
 import bcrypt from 'bcryptjs';
-import { v4 as uuid } from 'uuid';
 import { RedisStore } from 'connect-redis';
-import { Forbidden } from '@error/exceptions/Forbidden';
-import { BadRequest } from '@error/exceptions/BadRequest';
-import userAdminRequestSchema from '../validation/userAdminRequestSchema';
-import changePasswordRequestSchema from '../validation/changePasswordRequestSchema';
+import { v4 as uuid } from 'uuid';
+import { AuditService } from '@audit/services/AuditService';
 
-const ONE_HOUR = 3600000;
+const ONE_HOUR_IN_MS = 3600000;
 
 export class UserService {
   constructor(
     private userRepository: EntityRepository<UserEntity>,
     private sessionStore: RedisStore,
     private entityManager: EntityManager<PostgreSqlDriver>,
+    private auditService: AuditService,
   ) {}
 
   private async verifyUsernameAndEmailUnique(
@@ -84,7 +88,7 @@ export class UserService {
       userEntity.assign(
         {
           reset: {
-            resetExipration: Date.now() + ONE_HOUR,
+            resetExipration: Date.now() + ONE_HOUR_IN_MS,
             resetId: uuid(),
           },
         },
@@ -94,16 +98,59 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
-    return userEntity;
-  }
-
-  async createUser(request: UserRequest): Promise<UserEntity> {
-    const userEntity = await this.adminCreateUser({
-      ...request,
-      roles: ['USER'],
+    await this.auditService.addCreateAudit({
+      entityName: UserEntity.name,
+      resourceId: userEntity.id,
+      resourceName: userEntity.username,
+      data: userEntity.toPOJO(),
     });
 
     return userEntity;
+  }
+
+  async createUser(request: UserRequest): Promise<UserEntity | null> {
+    try {
+      const userEntity = await this.adminCreateUser({
+        username: request.username,
+        email: request.email,
+        roles: ['USER'],
+      });
+
+      // TODO send verification email
+
+      return userEntity;
+    } catch (e) {
+      if (e instanceof BadRequest) {
+        const userEntity = await this.userRepository.findOne({
+          email: request.email,
+          active: true,
+        });
+
+        if (userEntity && userEntity.active) {
+          const resetId = uuid();
+
+          userEntity.assign(
+            {
+              reset: {
+                resetExpiration: `${Date.now() + ONE_HOUR_IN_MS}`,
+                resetId,
+              },
+            },
+            { mergeObjects: true },
+          );
+
+          // TODO send email with reset
+
+          await this.userRepository.persistAndFlush(userEntity);
+        } else if (userEntity && !userEntity.active) {
+          // TODO send email telling user acount is inactive
+        }
+
+        return null;
+      }
+
+      throw e;
+    }
   }
 
   async updateUser(
@@ -113,6 +160,7 @@ export class UserService {
   ): Promise<UserEntity> {
     await userAdminRequestSchema.validate(request);
     const userEntity = await this.userRepository.findOneOrFail({ id: userId });
+    const originalUser = userEntity.toPOJO();
 
     userEntity.assign({
       username: request.username,
@@ -125,12 +173,36 @@ export class UserService {
       userEntity.assign({ password });
     }
 
+    await this.auditService.addUpdateAudit({
+      entityName: UserEntity.name,
+      resourceId: userEntity.id,
+      resourceName: originalUser.username,
+      originalValue: originalUser,
+      newValue: userEntity.toPOJO(),
+    });
+
     await this.userRepository.persistAndFlush(userEntity);
 
     if (logUserOut || request.password) {
       const userSession = await this.findUserSession(userId);
       if (userSession) {
-        this.removeSession(userSession);
+        await this.removeSession(userSession);
+
+        await this.auditService.addCustomAudit({
+          action: 'logged out',
+          entityName: UserEntity.name,
+          resourceId: userEntity.id,
+          resourceName: userEntity.username,
+        });
+      }
+
+      if (request.password) {
+        await this.auditService.addCustomAudit({
+          action: 'changed password for',
+          entityName: UserEntity.name,
+          resourceId: userEntity.id,
+          resourceName: userEntity.username,
+        });
       }
     }
 
@@ -180,6 +252,12 @@ export class UserService {
 
     await this.userRepository.removeAndFlush(userEntity);
 
+    await this.auditService.addDeleteAudit({
+      entityName: UserEntity.name,
+      resourceId: userEntity.id,
+      resourceName: userEntity.username,
+    });
+
     return userId;
   }
 
@@ -195,6 +273,13 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
+    await this.auditService.addCustomAudit({
+      action: 'disabled',
+      entityName: UserEntity.name,
+      resourceId: userEntity.id,
+      resourceName: userEntity.username,
+    });
+
     return userId;
   }
 
@@ -205,13 +290,32 @@ export class UserService {
 
     await this.userRepository.persistAndFlush(userEntity);
 
+    await this.auditService.addCustomAudit({
+      action: 'enabled',
+      entityName: UserEntity.name,
+      resourceId: userEntity.id,
+      resourceName: userEntity.username,
+    });
+
     return userId;
   }
 
   async forceLogoutUser(userId: string): Promise<string | null> {
+    const userEntity = await this.userRepository.findOneOrFail({
+      id: userId,
+    });
+
     const sid = await this.findUserSession(userId);
     if (sid) {
       await this.removeSession(sid);
+
+      await this.auditService.addCustomAudit({
+        action: 'logged out',
+        entityName: UserEntity.name,
+        resourceId: userEntity.id,
+        resourceName: userEntity.username,
+      });
+
       return userId;
     }
 
@@ -229,7 +333,7 @@ export class UserService {
     });
 
     if (!userEntity.password) {
-      throw new Forbidden();
+      throw new NotAuthorized();
     }
 
     const isValid = await bcrypt.compare(
@@ -238,7 +342,7 @@ export class UserService {
     );
 
     if (!isValid) {
-      throw new Forbidden();
+      throw new NotAuthorized();
     }
 
     const password = await bcrypt.hash(request.newPassword, 10);
@@ -353,5 +457,60 @@ export class UserService {
       page,
       limit,
     );
+  }
+
+  async resetPasswordRequest(email: string): Promise<void> {
+    await resetPasswordRequestSchema.validate({ email });
+
+    const userEntity = await this.userRepository.findOne({
+      email,
+    });
+
+    if (userEntity && userEntity.active) {
+      const resetId = uuid();
+
+      userEntity.assign(
+        {
+          reset: {
+            resetExpiration: `${Date.now() + ONE_HOUR_IN_MS}`,
+            resetId,
+          },
+        },
+        { mergeObjects: true },
+      );
+
+      // TODO send email with reset
+
+      await this.userRepository.persistAndFlush(userEntity);
+    } else if (userEntity && !userEntity.active) {
+      // TODO send email telling user acount is inactive
+    }
+  }
+
+  async resetPassword(resetId: string, password: string): Promise<UserEntity> {
+    await resetPasswordSchema.validate({ password });
+
+    const userEntity = await this.userRepository.findOne({
+      reset: {
+        resetId,
+      },
+      active: true,
+    });
+
+    const resetExpiration = userEntity?.reset.resetExpiration
+      ? Number(userEntity?.reset.resetExpiration)
+      : 0;
+
+    if (!userEntity || resetExpiration < Date.now()) {
+      throw new NotAuthorized();
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    userEntity.assign({ password: hashedPassword });
+
+    await this.userRepository.persistAndFlush(userEntity);
+
+    return userEntity;
   }
 }

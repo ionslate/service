@@ -6,6 +6,7 @@ import weaponModeResolver from '@content-manager/weapons/resolvers/weaponModeRes
 import weaponResolver from '@content-manager/weapons/resolvers/weaponResolver';
 import userResolver from '@users/resolvers/userResolver';
 import authResolver from '@auth/resolvers/authResolver';
+import auditResolver from '@audit/resolvers/auditResolver';
 import { Resolvers } from '@root/__generatedTypes__';
 
 export default [
@@ -17,4 +18,5 @@ export default [
   weaponResolver,
   authResolver,
   userResolver,
+  auditResolver,
 ] as Resolvers[];

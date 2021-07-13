@@ -6,6 +6,9 @@ import globby from 'globby';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
 import { promisify } from 'util';
+import transform from 'lodash/transform';
+import isEqual from 'lodash/isEqual';
+import isObject from 'lodash/isObject';
 
 const asyncReadFile = promisify(readFile);
 
@@ -56,4 +59,39 @@ export function findOneOrFailHandler(
   _where: Dictionary<never> | IPrimaryKeyValue,
 ): ResourceNotFound {
   return new ResourceNotFound(`${entityName.replace('Entity', '')} not found`);
+}
+
+/**
+ * Deep diff between two object, using lodash
+ * @param  {Object} object Object compared
+ * @param  {Object} base   Object to compare with
+ * @return {Object}        Return a new object who represent the diff
+ */
+export function difference(
+  object: Record<string, unknown>,
+  base: Record<string, unknown>,
+): Record<string, unknown> {
+  function changes(
+    object: Record<string, unknown>,
+    base: Record<string, unknown>,
+  ) {
+    return transform(
+      object,
+      function (result: Record<string, unknown>, value, key) {
+        if (!isEqual(value, base[key])) {
+          result[key] =
+            isObject(value) &&
+            !Array.isArray(value) &&
+            isObject(base[key]) &&
+            !Array.isArray(base[key])
+              ? changes(
+                  value as Record<string, unknown>,
+                  base[key] as Record<string, unknown>,
+                )
+              : value;
+        }
+      },
+    );
+  }
+  return changes(object, base);
 }

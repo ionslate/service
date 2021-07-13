@@ -2,11 +2,13 @@ import {
   ArrayType,
   BaseEntity,
   BigIntType,
+  Collection,
   EntitySchema,
   ReferenceType,
 } from '@mikro-orm/core';
 import { UserRole } from '@root/__generatedTypes__';
 import { v4 as uuid } from 'uuid';
+import { AuditEntity } from '../../audit/entities/AuditEntity';
 
 export class UserEntity extends BaseEntity<UserEntity, 'id'> {
   id!: string;
@@ -16,6 +18,7 @@ export class UserEntity extends BaseEntity<UserEntity, 'id'> {
   roles: UserRole[] = ['USER'];
   active = true;
   reset: PasswordReset = new PasswordReset();
+  auditTrail = new Collection<AuditEntity>(this);
 }
 
 export const userSchema = new EntitySchema({
@@ -32,6 +35,12 @@ export const userSchema = new EntitySchema({
     reset: {
       entity: () => PasswordReset,
       reference: ReferenceType.EMBEDDED,
+      hidden: true,
+    },
+    auditTrail: {
+      reference: '1:m',
+      entity: () => AuditEntity,
+      mappedBy: 'user',
       hidden: true,
     },
   },

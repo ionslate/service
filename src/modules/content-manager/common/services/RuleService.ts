@@ -3,9 +3,13 @@ import { QueryOrder } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Page, paginateEntites } from '@root/utils';
 import { RuleRequest, Search } from '@root/__generatedTypes__';
+import { AuditService } from '@audit/services/AuditService';
 
 export class RuleService {
-  constructor(private ruleRepository: EntityRepository<RuleEntity>) {}
+  constructor(
+    private ruleRepository: EntityRepository<RuleEntity>,
+    private auditService: AuditService,
+  ) {}
 
   async createRule(request: RuleRequest): Promise<RuleEntity> {
     const ruleEntity = this.ruleRepository.create({
@@ -16,11 +20,20 @@ export class RuleService {
 
     await this.ruleRepository.persistAndFlush(ruleEntity);
 
+    await this.auditService.addCreateAudit({
+      entityName: RuleEntity.name,
+      resourceId: ruleEntity.id,
+      resourceName: ruleEntity.name,
+      data: ruleEntity.toPOJO(),
+    });
+
     return ruleEntity;
   }
 
   async updateRule(ruleId: string, request: RuleRequest): Promise<RuleEntity> {
     const ruleEntity = await this.ruleRepository.findOneOrFail({ id: ruleId });
+
+    const originalRule = ruleEntity.toPOJO();
 
     ruleEntity.assign({
       name: request.name,
@@ -29,6 +42,14 @@ export class RuleService {
     });
 
     await this.ruleRepository.persistAndFlush(ruleEntity);
+
+    await this.auditService.addUpdateAudit({
+      entityName: RuleEntity.name,
+      resourceId: ruleEntity.id,
+      resourceName: originalRule.name,
+      originalValue: originalRule,
+      newValue: ruleEntity.toPOJO(),
+    });
 
     return ruleEntity;
   }
