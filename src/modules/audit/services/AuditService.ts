@@ -137,11 +137,11 @@ export class AuditService {
 
     const auditEntity = this.auditRepository.create({
       user: userEntity,
+      resourceId,
       data: {
         type: 'CUSTOM',
         action,
         entityName,
-        resourceId,
         resourceName,
         parentResourceName,
       },
